@@ -1,0 +1,8 @@
+bin/
+obj/
+dist/
+.vs/
+*.user
+docs/pics/*.png
+docs/pics/nexus/_tile_*.png
+docs/pics/nexus/_option*.jpg

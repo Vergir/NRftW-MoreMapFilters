@@ -49,6 +49,121 @@ internal static class ClearedState
     private static readonly Dictionary<IntPtr, string> ClassNames = new();
     private static bool _errorLogged, _timingLogged;
 
+    /// <summary>Activated whispers (per world), re-read with the cleared state and after an activation (LiveUpdates).</summary>
+    private static readonly HashSet<long> ActivatedWhispers = new();
+
+    public static bool IsActivated(long whisper) => ActivatedWhispers.Contains(whisper);
+
+    /// <summary>Key pickups that are gone for good (see KeyKind), and the door puzzles' saved states.</summary>
+    private static readonly HashSet<long> KeysGone = new();
+    private static readonly Dictionary<long, long> PuzzleStates = new();
+
+    public static bool IsKeyGone(long pickup) => KeysGone.Contains(pickup);
+
+    /// <summary>Opened shortcuts (ShortcutData) and broken walls from the save.</summary>
+    private static readonly HashSet<long> ShortcutsOpen = new(), BrokenWalls = new();
+
+    public static bool IsShortcutOpen(long guid) => ShortcutsOpen.Contains(guid);
+
+    /// <summary>
+    /// Opened = the record's own IsTriggered (live state while loaded, else its save entry: ladder KickedDown, door IsOpen,
+    /// lever state != initial), a puzzle in one of its open states (live PuzzleAPI.GetStateId, else the saved state,
+    /// else its initial one), a breakable wall despawned (live / saved LastDespawnTime). Remembered per world.
+    /// </summary>
+    private static void ReadShortcuts(Frame f)
+    {
+        ShortcutsOpen.Clear();
+        if (NodeIndex.ShortcutRecords.Count == 0) return;
+        string world = FilterRow.World();
+        bool remembered = false;
+        foreach (var kv in NodeIndex.ShortcutRecords)
+        {
+            long guid = kv.Key;
+            var (record, entry) = kv.Value;
+            bool open = Prefs.IsShortcutOpened(world, guid);
+            if (!open)
+            {
+                switch (entry.Record)
+                {
+                    case ShortcutRecord.Ladder: open = record.TryCast<LadderStaticInstanceData>()?.IsTriggered(f) ?? false; break;
+                    case ShortcutRecord.Door: open = record.TryCast<DoorStaticInstanceData>()?.IsTriggered(f) ?? false; break;
+                    case ShortcutRecord.Lever: open = record.TryCast<LeverStaticInstanceData>()?.IsTriggered(f) ?? false; break;
+                    case ShortcutRecord.Puzzle:
+                    {
+                        var e = IdentityComponentAPI.ResolveEntity(f, guid);
+                        long state = f.Exists(e) ? PuzzleAPI.GetStateId(f, e)
+                                                 : PuzzleStates.TryGetValue(guid, out long saved) ? saved : entry.InitialState;
+                        open = state >= 0 && state < 31 && (entry.OpenMask & (1 << (int)state)) != 0;
+                        break;
+                    }
+                    case ShortcutRecord.Destructible:
+                    {
+                        var e = IdentityComponentAPI.ResolveEntity(f, guid);
+                        open = f.Exists(e) ? !RespawnablesAPI.IsRespawnableCurrentlySpawned(f, e) : BrokenWalls.Contains(guid);
+                        break;
+                    }
+                }
+                if (open) remembered |= Prefs.RememberShortcutOpened(world, guid);
+            }
+            if (open) ShortcutsOpen.Add(guid);
+        }
+        if (remembered) MelonLoader.MelonPreferences.Save();
+        MapResourceMarkersMod.Debug($"Shortcuts: {ShortcutsOpen.Count} of {NodeIndex.ShortcutRecords.Count} opened in this world");
+    }
+
+    private static readonly HashSet<string> GuardLogged = new();
+
+    /// <summary>One read that must not take the others down (game APIs called from the main thread).</summary>
+    private static void Guarded(string what, Action<Frame> read, Frame f)
+    {
+        try { read(f); }
+        catch (Exception e)
+        {
+            if (GuardLogged.Add(what)) MapResourceMarkersMod.Log.Warning($"Reading {what} failed ({e.GetType().Name}: {e.Message}).");
+        }
+    }
+
+    private static void ReadKeys(Frame f)
+    {
+        KeysGone.Clear();
+        if (NodeIndex.KeyData.Count == 0) return;
+        string world = FilterRow.World();
+        var owner = f.InventorySystem.RealmInventoryOwner;
+        bool remembered = false;
+        foreach (var kv in NodeIndex.KeyData)
+        {
+            long pickup = kv.Key;
+            var (item, puzzle) = KeyKind.Pickups[pickup];
+            bool known = Prefs.IsKeyCollected(world, pickup);
+            long state = -1;
+            bool live = false;
+            if (puzzle != 0)
+            {
+                // Door puzzle: 0 = key not taken, 1 = key taken, 2 = door opened (verified in game); its live state
+                // while loaded, else the saved one (-2 = no record: not touched).
+                var e = IdentityComponentAPI.ResolveEntity(f, puzzle);
+                live = f.Exists(e);
+                state = live ? PuzzleAPI.GetStateId(f, e) : PuzzleStates.TryGetValue(puzzle, out long saved) ? saved : -2;
+            }
+            var keyRef = new AssetRefHeroItemData { Id = new AssetGuid(item) };
+            int owned = InventoryAPI.GetItemMatchingCount(f, owner, keyRef, false);
+            bool spawnable = RespawnablesAPI.DoesPassSpawnRequirements(f, new IRespawnableEntity(kv.Value.Pointer));
+            bool gone = known || (puzzle != 0 && state > 0) || owned >= 1 || !spawnable;
+            if (!gone) continue;
+            KeysGone.Add(pickup);
+            remembered |= Prefs.RememberKeyCollected(world, pickup);
+        }
+        MapResourceMarkersMod.Debug($"Keys: {KeysGone.Count} of {NodeIndex.KeyData.Count} collected in this world");
+        if (remembered) MelonLoader.MelonPreferences.Save();
+    }
+
+    private static void ReadWhispers(Frame f)
+    {
+        ActivatedWhispers.Clear();
+        foreach (var kv in NodeIndex.WhisperData)
+            if (Il2Cpp.CerimWhisperViewAPI.IsActivated(f, kv.Value)) ActivatedWhispers.Add(kv.Key);
+    }
+
     public static bool IsCleared(MapPoint p, Frame? f)
     {
         bool saved = p.Source switch
@@ -76,6 +191,8 @@ internal static class ClearedState
         Spawners.Clear();
         StaticChests.Clear();
         ChestSpawners.Clear();
+        PuzzleStates.Clear();
+        BrokenWalls.Clear();
         try
         {
             var realm = GameSaveData.Get(f)?.RealmContents;
@@ -95,6 +212,12 @@ internal static class ClearedState
                     switch (ClassOf(ecs))
                     {
                         case "LinkedFarmableResourceData.EcsPersistentData":
+                        case "DestructibleData.EcsPersistentData":   // breakable walls: LastDespawnTime @0x18
+                            if (Marshal.ReadInt64(ecs, 0x18) != 0) BrokenWalls.Add(id);
+                            break;
+                        case "PuzzleData.EcsPersistentData":   // door puzzle (keys): long State @0x18
+                            PuzzleStates[id] = Marshal.ReadInt64(ecs, 0x18);
+                            break;
                         case "LinkedContainerData.EcsPersistentData":   // static chest: LastDespawnTime @0x18, IsOpen @0x28
                             if (Marshal.ReadInt64(ecs, 0x18) != 0 || Marshal.ReadInt32(ecs, 0x28) != 0) StaticChests.Add(id);
                             break;
@@ -141,6 +264,9 @@ internal static class ClearedState
             }
 
             double saved = sw.Elapsed.TotalMilliseconds;
+            Guarded("whispers", ReadWhispers, f);
+            Guarded("keys", ReadKeys, f);
+            Guarded("shortcuts", ReadShortcuts, f);
             int loaded = LiveNodes(f, LoadedRange);
             double nodesDone = sw.Elapsed.TotalMilliseconds;
             LiveEnemies(f, LoadedRange);
@@ -167,6 +293,9 @@ internal static class ClearedState
         {
             LiveNodes(f, HookRange);
             LiveEnemies(f, HookEnemyRange);
+            Guarded("whispers", ReadWhispers, f);
+            Guarded("keys", ReadKeys, f);
+            Guarded("shortcuts", ReadShortcuts, f);
         }
         catch (Exception e)
         {

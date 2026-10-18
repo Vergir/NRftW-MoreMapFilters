@@ -195,7 +195,7 @@ internal static class FilterRow
     /// .SaveDataHandler.m_localRealmId, Guid @0x70); "" when unknown. Not MoonQuantumGame.RealmId (empty offline) nor
     /// SeenItemsRegistry.GetCurrentRealmId (returns the type name "frameworks.session.SessionDefinition" in build 29466).
     /// </summary>
-    private static string World()
+    public static string World()
     {
         try
         {

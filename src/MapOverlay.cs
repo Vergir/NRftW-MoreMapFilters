@@ -43,7 +43,7 @@ internal static class MapOverlay
     public const string Prefix = "MRM_";
 
     private static MapScreen? _screen;
-    private static RectTransform? _root;
+    private static RectTransform? _root, _topRoot;
     /// <summary>One map marker: a point on a map, or all points of one type behind one interior exit.</summary>
     private sealed class Marker
     {
@@ -411,6 +411,7 @@ internal static class MapOverlay
         foreach (var type in MarkerTypes.All)
             if (Prefs.IsSelected(type) && Prefs.GroupOn(type.Group) && !Built.Contains(type)) BuildType(type);
         _spritesMissing = false;
+        if (_topRoot != null && _topRoot.GetSiblingIndex() != _topRoot.parent.childCount - 1) _topRoot.SetAsLastSibling();
         var hero = Heroes.Local();
         Vector3? heroPos = hero != null ? hero.transform.position : null;
         var currentPtr = HeroSlice();
@@ -438,6 +439,9 @@ internal static class MapOverlay
                 {
                     var state = EnemyIndex.State(p.ContentSet);
                     if (state == EnemyIndex.SpawnState.Hidden) continue;
+                    if (p.Source == PointSource.Whisper && ClearedState.IsActivated(p.EntityId)) continue;   // found: gone
+                    if (p.Source == PointSource.Key && ClearedState.IsKeyGone(p.EntityId)) continue;        // collected: gone
+                    if (p.Source == PointSource.Shortcut && ClearedState.IsShortcutOpen(p.EntityId)) continue;   // opened: gone
                     // Chests in a plague safe haven (Sacrament) never come back once opened (seen in game): hide them.
                     if (p.Source is PointSource.Chest or PointSource.ChestSpawner && EnemyIndex.InSafeHaven(p.ContentSet)
                         && ClearedState.IsCleared(p, frame)) continue;
@@ -448,7 +452,8 @@ internal static class MapOverlay
                     if (ClearedState.IsCleared(p, frame)) cleared++;
                 }
             visible &= shown > 0;
-            if (visible && f != null && !FogOfWarSystem.IsExplored(f, FogOfWarSystem.GetCellRef(f, m.Place.Sim)))
+            // Undiscovered whispers ignore "unexplored areas": they would hardly ever show otherwise.
+            if (visible && f != null && m.Type is not WhisperKind && !FogOfWarSystem.IsExplored(f, FogOfWarSystem.GetCellRef(f, m.Place.Sim)))
                 visible = false;
             if (visible && certain == 0 && m.Place.Exit is { } caveExit && GuaranteedInCave(m.Type, caveExit.Chunk)) certain = 1;
             // "?" toggle off (FilterRow): only markers with something certain.
@@ -461,7 +466,9 @@ internal static class MapOverlay
             var img = go.GetComponent<Image>();
             if (sprite == null) _spritesMissing = true;
             else if (img.sprite == null || img.sprite.Pointer != sprite.Pointer) img.sprite = sprite;
-            if (heroPos is Vector3 hp) HeightArrows.Apply(go, m.Place.Position, hp);
+            // Ladders / trapdoors are reached from the top: their arrow shows from 1.5 m (the game's 5 m misses short ones).
+            if (heroPos is Vector3 hp)
+                HeightArrows.Apply(go, m.Place.Position, hp, m.Place.Exit == null && NodeIndex.ShortcutsAbove.Contains(m.Points[0].EntityId) ? 1.5f : -1f);
         }
         if (near != null) return;
         _shownSlice = currentPtr;
@@ -492,18 +499,24 @@ internal static class MapOverlay
         AllPoints.AddRange(NodeIndex.Chests);
         AllPoints.AddRange(EnemyIndex.Chests);
         AllPoints.AddRange(EnemyIndex.SpecialShinies);
+        AllPoints.AddRange(NodeIndex.Whispers);
+        AllPoints.AddRange(NodeIndex.Keys);
+        AllPoints.AddRange(NodeIndex.Shortcuts);
         var available = new HashSet<MarkerType>();
         var eligible = new HashSet<MarkerType>();
         foreach (var p in AllPoints)
         {
             if (available.Contains(p.Type)) continue;
             var state = EnemyIndex.State(p.ContentSet);
+            if (p.Source == PointSource.Whisper && ClearedState.IsActivated(p.EntityId)) state = EnemyIndex.SpawnState.Hidden;
+            if (p.Source == PointSource.Key && ClearedState.IsKeyGone(p.EntityId)) state = EnemyIndex.SpawnState.Hidden;
+            if (p.Source == PointSource.Shortcut && ClearedState.IsShortcutOpen(p.EntityId)) state = EnemyIndex.SpawnState.Hidden;
             bool live = Prefs.ShowPossible.Value ? state != EnemyIndex.SpawnState.Hidden
                                                  : state == EnemyIndex.SpawnState.Plain && !p.Possible;
             if (!live && (eligible.Contains(p.Type) || !EnemyIndex.IsEligible(p.ContentSet))) continue;
             var place = PlaceFor(p);
             if (place.Slice == System.IntPtr.Zero) continue;
-            if (!showUnrevealed && !FogOfWarSystem.IsExplored(f, FogOfWarSystem.GetCellRef(f, place.Sim))) continue;
+            if (!showUnrevealed && p.Type is not WhisperKind && !FogOfWarSystem.IsExplored(f, FogOfWarSystem.GetCellRef(f, place.Sim))) continue;
             eligible.Add(p.Type);
             if (live) available.Add(p.Type);
         }
@@ -619,6 +632,15 @@ internal static class MapOverlay
         _root.sizeDelta = Vector2.zero;
         _root.localPosition = Vector3.zero;
         _root.SetAsFirstSibling();
+        // A second root drawn after the game's icons: undiscovered whispers sit on the game's own whisper icon.
+        var topGo = new GameObject(Prefix + "MarkersTop");
+        _topRoot = topGo.AddComponent<RectTransform>();
+        _topRoot.SetParent(layer, false, false);
+        _topRoot.anchorMin = _topRoot.anchorMax = _root.anchorMin;
+        _topRoot.pivot = new Vector2(0.5f, 0.5f);
+        _topRoot.sizeDelta = Vector2.zero;
+        _topRoot.localPosition = Vector3.zero;
+        _topRoot.SetAsLastSibling();
         Built.Clear();
         _lastScale = Vector3.zero;
         _lastSize = 0f;
@@ -628,7 +650,9 @@ internal static class MapOverlay
     {
         Built.Add(type);
         var points = type is EnemyKind ? EnemyIndex.Points : type is AnimalKind ? AnimalIndex.Points
-            : type is ChestKind ? ChestPoints() : type is SpecialShinyKind ? EnemyIndex.SpecialShinies : NodeIndex.Nodes;
+            : type is ChestKind ? ChestPoints() : type is SpecialShinyKind ? EnemyIndex.SpecialShinies
+            : type is WhisperKind ? NodeIndex.Whispers : type is KeyKind ? NodeIndex.Keys
+            : type is ShortcutType ? NodeIndex.Shortcuts : NodeIndex.Nodes;
         var caves = new Dictionary<Exit, Marker>();
         int n = 0, inCaves = 0;
         foreach (var point in points)
@@ -641,7 +665,7 @@ internal static class MapOverlay
                 inCaves++;
                 if (caves.TryGetValue(exit, out var shared)) { shared.Points.Add(point); continue; }
             }
-            var m = new Marker { Type = type, Place = place, Go = NewMarker(point.Name, place.Position) };
+            var m = new Marker { Type = type, Place = place, Go = NewMarker(point.Name, place.Position, type is WhisperKind) };
             m.Points.Add(point);
             Markers.Add(m);
             if (place.Exit != null) caves[place.Exit] = m;
@@ -658,11 +682,11 @@ internal static class MapOverlay
         return list;
     }
 
-    private static GameObject NewMarker(string name, Vector3 position)
+    private static GameObject NewMarker(string name, Vector3 position, bool onTop = false)
     {
         var go = new GameObject(Prefix + name);
         var rt = go.AddComponent<RectTransform>();
-        rt.SetParent(_root, false, false);
+        rt.SetParent(onTop && _topRoot != null ? _topRoot : _root, false, false);
         rt.localPosition = new Vector3(position.x, position.z, 0f);
         var img = go.AddComponent<Image>();
         img.preserveAspect = true;
@@ -701,6 +725,8 @@ internal static class MapOverlay
     private static void DestroyMarkers()
     {
         if (_root != null) Object.Destroy(_root.gameObject);
+        if (_topRoot != null) Object.Destroy(_topRoot.gameObject);
+        _topRoot = null;
         _root = null;
         Markers.Clear();
         PlaceOf.Clear();

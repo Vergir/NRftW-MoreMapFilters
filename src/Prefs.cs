@@ -16,6 +16,8 @@ internal static class Prefs
     public static MelonPreferences_Entry<bool> Debug = null!;
     public static MelonPreferences_Entry<string> Unlocked = null!;
     public static MelonPreferences_Entry<bool> ShowPossible = null!;
+    public static MelonPreferences_Entry<string> CollectedKeys = null!;
+    public static MelonPreferences_Entry<string> OpenedShortcuts = null!;
     private static readonly Dictionary<MarkerCategory, MelonPreferences_Entry<bool>> Categories = new();
 
     /// <summary>The group's buttons are in the Markers row and its markers on the map (its category is switched on).</summary>
@@ -54,6 +56,11 @@ internal static class Prefs
         ShowPossible = cat.CreateEntry("ShowPossible", true,
             description: "Show \"?\" markers (spots that only may have the type when you get there). Toggled by the \"?\" " +
                          "button next to the Markers title in the map's Filters menu.");
+        // "CollectedKeys" (first build) wrongly recorded every key: a new key starts clean.
+        CollectedKeys = cat.CreateEntry("KeysCollected", "",
+            description: "Per world: key pickups already collected (hidden from the map for good). Written by the mod.");
+        OpenedShortcuts = cat.CreateEntry("ShortcutsOpened", "",
+            description: "Per world: shortcuts already opened (hidden from the map for good). Written by the mod.");
         Unlocked = cat.CreateEntry("Unlocked", "",
             description: "Per world: marker types that have had something to show, so their buttons stay in the Markers row. " +
                          "Format: worldId=id,id;worldId=id,... Written by the mod.");
@@ -99,6 +106,50 @@ internal static class Prefs
     }
 
     public static void SaveUnlocked() => MelonPreferences.Save();
+
+    private static PerWorldSet? _keys, _shortcuts;
+    private static PerWorldSet Keys => _keys ??= new PerWorldSet(CollectedKeys);
+    private static PerWorldSet Shortcuts => _shortcuts ??= new PerWorldSet(OpenedShortcuts);
+
+    /// <summary>Key pickups collected in this world (KeyKind): a safety net, they never come back.</summary>
+    public static bool IsKeyCollected(string world, long pickup) => Keys.Contains(world, pickup);
+    /// <summary>True when newly remembered (save the preferences after a batch).</summary>
+    public static bool RememberKeyCollected(string world, long pickup) => Keys.Add(world, pickup);
+
+    /// <summary>Shortcuts opened in this world: hidden for good (Faith and Flame raises a few ladders again).</summary>
+    public static bool IsShortcutOpened(string world, long guid) => Shortcuts.Contains(world, guid);
+    public static bool RememberShortcutOpened(string world, long guid) => Shortcuts.Add(world, guid);
+
+    /// <summary>A set of ids per world (realm guid, 32 hex) in one string entry: "world=id,id;world=id".</summary>
+    private sealed class PerWorldSet
+    {
+        private readonly MelonPreferences_Entry<string> _entry;
+        private readonly Dictionary<string, HashSet<string>> _sets = new();
+
+        public PerWorldSet(MelonPreferences_Entry<string> entry)
+        {
+            _entry = entry;
+            foreach (var world in entry.Value.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                int eq = world.IndexOf('=');
+                if (eq != 32) continue;
+                _sets[world.Substring(0, eq)] = new HashSet<string>(
+                    world.Substring(eq + 1).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+            }
+        }
+
+        public bool Contains(string world, long id) =>
+            world.Length > 0 && _sets.TryGetValue(world, out var set) && set.Contains(id.ToString());
+
+        public bool Add(string world, long id)
+        {
+            if (world.Length == 0) return false;
+            if (!_sets.TryGetValue(world, out var set)) _sets[world] = set = new HashSet<string>();
+            if (!set.Add(id.ToString())) return false;
+            _entry.Value = string.Join(";", _sets.Select(w => w.Key + "=" + string.Join(",", w.Value)));
+            return true;
+        }
+    }
 
     public static void SetSelected(MarkerType type, bool on)
     {

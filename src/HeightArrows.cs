@@ -73,7 +73,8 @@ internal static class HeightArrows
     }
 
     /// <summary>Show / hide / orient the arrow of one visible marker for the hero's position.</summary>
-    public static void Apply(GameObject marker, Vector3 point, Vector3 hero)
+    /// <param name="minHeight">Height difference from which the arrow shows; negative = the game's threshold.</param>
+    public static void Apply(GameObject marker, Vector3 point, Vector3 hero, float minHeight = -1f)
     {
         var existing = marker.transform.Find(ChildName);
         bool show = false;
@@ -81,7 +82,7 @@ internal static class HeightArrows
         if (_ready)
         {
             float dx = point.x - hero.x, dz = point.z - hero.z;
-            show = dx * dx + dz * dz <= _maxDistance * _maxDistance && Mathf.Abs(dy) >= _threshold;
+            show = dx * dx + dz * dz <= _maxDistance * _maxDistance && Mathf.Abs(dy) >= (minHeight >= 0f ? minHeight : _threshold);
         }
         if (!show)
         {

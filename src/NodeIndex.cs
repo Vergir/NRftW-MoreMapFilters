@@ -14,6 +14,9 @@ internal enum PointSource
     Spawner,     // DynamicSpawnerData.Guid
     Chest,       // ContainerStaticInstanceData.InstanceGuid (static chest)
     ChestSpawner,// DynamicSpawnerData.Guid of a chest spawner
+    Whisper,     // CerimWhisperStaticInstanceData.InstanceGuid
+    Key,         // the key pickup container's InstanceGuid
+    Shortcut,    // the shortcut record's InstanceGuid (ShortcutData)
 }
 
 /// <summary>One marker position: a resource node or an enemy spawn point.</summary>
@@ -60,6 +63,16 @@ internal static class NodeIndex
     public static readonly List<MapPoint> Nodes = new();
     /// <summary>The static chests (ChestKind.StaticSettings); the spawned ones are in EnemyIndex.Chests.</summary>
     public static readonly List<MapPoint> Chests = new();
+    /// <summary>The whispers, with their instance data (CerimWhisperViewAPI.IsActivated takes it).</summary>
+    public static readonly List<MapPoint> Whispers = new();
+    public static readonly Dictionary<long, CerimWhisperStaticInstanceData> WhisperData = new();
+    /// <summary>Key pickups, with their container data (RespawnablesAPI.DoesPassSpawnRequirements takes it).</summary>
+    public static readonly List<MapPoint> Keys = new();
+    public static readonly Dictionary<long, ContainerStaticInstanceData> KeyData = new();
+    /// <summary>Shortcuts (ShortcutData) with their records; Above = reached from the top (ladders, trapdoors).</summary>
+    public static readonly List<MapPoint> Shortcuts = new();
+    public static readonly Dictionary<long, (LinkedEntityInstanceData Record, ShortcutData.Entry Entry)> ShortcutRecords = new();
+    public static readonly HashSet<long> ShortcutsAbove = new();
 
     /// <summary>Count of LinkedEntityInstanceData the index was built from; -1 = not built.</summary>
     private static int _builtFrom = -1;
@@ -75,6 +88,15 @@ internal static class NodeIndex
 
         Nodes.Clear();
         Chests.Clear();
+        Whispers.Clear();
+        WhisperData.Clear();
+        Keys.Clear();
+        KeyData.Clear();
+        Shortcuts.Clear();
+        ShortcutRecords.Clear();
+        ShortcutsAbove.Clear();
+        var shortcutEntries = new Dictionary<long, ShortcutData.Entry>();
+        foreach (var entry in ShortcutData.All) shortcutEntries[entry.Guid] = entry;
         // Content set of every linked entity: the chunk (always there) or an area variant / quest nugget it belongs to
         // (analysis/world_states.md 7: e.g. 28 spruce at the Nameless Pass battering ram exist only until Faith and Flame
         // is done). Drawn by the same rules as enemy spawns (EnemyIndex.State).
@@ -97,9 +119,34 @@ internal static class NodeIndex
         {
             var e = all[i];
             if (e == null) continue;
+            if (shortcutEntries.TryGetValue(e.InstanceGuid, out var sc))
+            {
+                setOf.TryGetValue(e.InstanceGuid, out long scSet);
+                var at = new Vector3(sc.X, sc.Y, sc.Z);
+                Shortcuts.Add(new MapPoint(MarkerTypes.Shortcut, e.Name ?? "", at, new FPVector2(e.Position.X, e.Position.Z),
+                    PointSource.Shortcut, e.InstanceGuid, scSet));
+                ShortcutRecords[e.InstanceGuid] = (e, sc);
+                if (sc.Kind is ShortcutKind.Ladder or ShortcutKind.Trapdoor) ShortcutsAbove.Add(e.InstanceGuid);
+                continue;
+            }
+            var whisper = e.TryCast<CerimWhisperStaticInstanceData>();
+            if (whisper != null)
+            {
+                setOf.TryGetValue(e.InstanceGuid, out long whisperSet);
+                Whispers.Add(MapPoint.At(MarkerTypes.Whisper, e.Name, e.Position, PointSource.Whisper, e.InstanceGuid, whisperSet));
+                WhisperData[e.InstanceGuid] = whisper;
+                continue;
+            }
             var container = e.TryCast<ContainerStaticInstanceData>();
             if (container != null)
             {
+                if (KeyKind.Pickups.ContainsKey(e.InstanceGuid))
+                {
+                    setOf.TryGetValue(e.InstanceGuid, out long keySet);
+                    Keys.Add(MapPoint.At(MarkerTypes.Key, e.Name, e.Position, PointSource.Key, e.InstanceGuid, keySet));
+                    KeyData[e.InstanceGuid] = container;
+                    continue;
+                }
                 if (System.Array.IndexOf(ChestKind.StaticSettings, container.Settings.Id.Value) >= 0)
                 {
                     setOf.TryGetValue(e.InstanceGuid, out long chestSet);

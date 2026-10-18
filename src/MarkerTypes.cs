@@ -15,7 +15,8 @@ internal enum MarkerGroup
     Cooking,      // herbs, raw food
     Animals,
     Enemies,
-    Valuables,    // treasure chests, special shinies, Dire Nettle
+    Valuables,    // treasure chests, special shinies, keys
+    Navigation,   // undiscovered whispers, unopened shortcuts, Dire Nettles
 }
 
 /// <summary>What a settings checkbox switches (Options > Gameplay).</summary>
@@ -26,6 +27,7 @@ internal enum MarkerCategory
     Animals,
     Enemies,
     Valuables,
+    Navigation,
 }
 
 internal static class MarkerGroups
@@ -40,6 +42,7 @@ internal static class MarkerGroups
         MarkerGroup.Cooking => c == MarkerCategory.Cooking,
         MarkerGroup.Animals => c == MarkerCategory.Animals,
         MarkerGroup.Enemies => c == MarkerCategory.Enemies,
+        MarkerGroup.Navigation => c == MarkerCategory.Navigation,
         _ => c == MarkerCategory.Valuables,
     };
 
@@ -49,6 +52,7 @@ internal static class MarkerGroups
         MarkerCategory.Cooking => "Cooking",
         MarkerCategory.Animals => "Wild Animals",
         MarkerCategory.Enemies => "Enemies",
+        MarkerCategory.Navigation => "Navigation",
         _ => "Valuables",
     };
 
@@ -63,12 +67,17 @@ internal static class MarkerGroups
             "Map marker buttons for animals whose parts upgrade gear, e.g. Boar, Wolf, Bear.",
         MarkerCategory.Enemies =>
             "Map marker buttons for enemy factions, handy for \"Kill N\" challenges, e.g. The Risen, Nith, Harvesters.",
-        _ => "Map marker buttons for treasure chests, special (orange) shinies and Dire Nettles. Shows where loot is: " +
+        MarkerCategory.Navigation =>
+            "Map marker buttons for whispers you have not found yet, shortcuts you have not opened yet and Dire Nettles. " +
+            "Shows the way: this might spoil the fun of discovery.",
+        _ => "Map marker buttons for treasure chests, special (orange) shinies and keys. Shows where loot is: " +
              "this might feel like cheating or spoil the fun of exploring.",
     };
 
-    /// <summary>Off until the player opts in: Valuables (shows where loot is) and Cooking (a long row of ingredients).</summary>
-    public static bool DefaultOn(MarkerCategory c) => c is not (MarkerCategory.Valuables or MarkerCategory.Cooking);
+    /// <summary>Off until the player opts in: Valuables (shows where loot is), Navigation (spoils discovery) and Cooking (a
+    /// long row of ingredients).</summary>
+    public static bool DefaultOn(MarkerCategory c) =>
+        c is not (MarkerCategory.Valuables or MarkerCategory.Navigation or MarkerCategory.Cooking);
 }
 
 /// <summary>Corner badge on a marker: "?" = the point only might have it (animal spawners), cross = cleared (harvested /
@@ -212,8 +221,78 @@ internal sealed class SpecialShinyKind : MarkerType
     public override Sprite? MarkerSprite(Badge badge, bool cave) => MarkerArt.ForGlyph(Id, "StarMapIcon", Tint, outlined: true, badge, cave);
 }
 
+/// <summary>
+/// Whispers not activated yet (analysis/whispers.md): CerimWhisperStaticInstanceData (27; 25 can be undiscovered, the
+/// Sacrament one always counts as activated). Activated = CerimWhisperViewAPI.IsActivated, per world; activated ones are
+/// hidden. Shown regardless of fog (they would otherwise hardly ever show) and drawn ON TOP of the game's own whisper
+/// icon, which the map draws for every whisper in explored areas, activated or not: the game's glyph
+/// (CerimWhispersMapIcon) tinted blue = "not activated yet".
+/// </summary>
+internal sealed class WhisperKind : MarkerType
+{
+    public static readonly Color32 Tint = new(95, 175, 255, 255);
+
+    public WhisperKind() : base("whispers", "Undiscovered Whispers", MarkerGroup.Navigation) { }
+
+    public override Sprite? ButtonSprite() => MarkerArt.ForGlyph(Id, "CerimWhispersMapIcon", Tint, outlined: false, Badge.None, false);
+    public override Sprite? MarkerSprite(Badge badge, bool cave) => MarkerArt.ForGlyph(Id, "CerimWhispersMapIcon", Tint, outlined: true, badge, cave);
+}
+
+/// <summary>
+/// Key pickups (analysis/keys.md): the world's 12 key / handle pickups are static genericPickupData containers (the
+/// prologue ship's one has no map). A key is gone for good once its door puzzle left state 0 (key taken / door opened),
+/// the key is in the world's key inventory, or the game's own spawn requirements fail; then it is hidden (no cross) and
+/// remembered per world. Glyph: the inventory's key tab icon, tinted.
+/// </summary>
+internal sealed class KeyKind : MarkerType
+{
+    public static readonly Color32 Tint = new(240, 225, 185, 255);
+
+    /// <summary>Pickup container InstanceGuid -> (key item guid, door puzzle InstanceGuid or 0).</summary>
+    public static readonly Dictionary<long, (long Item, long Puzzle)> Pickups = new()
+    {
+        [-223405633] = (3245662654056572303, -1970426462),   // Drainage Cellars Key, Black Trench sewer
+        [1710656204] = (1329279850794742407, 1815375971),    // Mess Hall Key, Mariner's Keep
+        [-1115910626] = (1214150691697037791, 1215343302),   // Old Cottage Key, Nameless Pass
+        [-781804684] = (2577383877235079674, -1473710726),   // Quarry Guard Key, Nameless Pass
+        [1620124048] = (145050438693965008, 0),              // Rusted Barnacle Key, Shallows tower cellar
+        [-849635468] = (2252927248326296960, -1678613092),   // Sacrament Graveyard Key, Marin Woods
+        [-885908055] = (469638929948347920, 0),              // Sewer Lever Handle (spawns while not owned)
+        [-268803067] = (1556652006884707210, -998530300),    // Storage Room Key, Mariner's Keep
+        [-1161991649] = (2519619463813960707, -562517716),   // Water Channel Key (Of Rats and Raiders quest content)
+        [139066641] = (4174370968087487041, 1629371066),     // Watermill Key, Marin Woods
+        [1032491712] = (1549423416919192258, -2054145403),   // Western Bridge Key (during The Innkeeper's Husband)
+        [-420189775] = (3315036590781135408, 1893189398),    // Windmill Key, Lowland Meadows
+    };
+
+    public KeyKind() : base("keys", "Keys", MarkerGroup.Valuables) { }
+
+    private const string Glyph = "uiInventoryTabKeyIcon";
+    public override Sprite? ButtonSprite() => MarkerArt.ForGlyph(Id, Glyph, Tint, outlined: false, Badge.None, false);
+    public override Sprite? MarkerSprite(Badge badge, bool cave) => MarkerArt.ForGlyph(Id, Glyph, Tint, outlined: true, badge, cave);
+}
+
+/// <summary>
+/// Shortcuts not opened yet (analysis/shortcuts.md, ShortcutData): kick-down ladders, trapdoors, one-way doors, drawbridges,
+/// lever gates, breakable walls. Opened ones are hidden for good (remembered per world). The marker sits where the
+/// player must go; ladders and trapdoors are reached from above and always get the "above" arrow near the hero. The
+/// game has no ladder glyph: its trapdoor map glyph, tinted teal.
+/// </summary>
+internal sealed class ShortcutType : MarkerType
+{
+    public static readonly Color32 Tint = new(70, 215, 185, 255);
+
+    public ShortcutType() : base("shortcuts", "Shortcuts", MarkerGroup.Navigation) { }
+
+    public override Sprite? ButtonSprite() => MarkerArt.ForGlyph(Id, "TrapdoorMapIcon", Tint, outlined: false, Badge.None, false);
+    public override Sprite? MarkerSprite(Badge badge, bool cave) => MarkerArt.ForGlyph(Id, "TrapdoorMapIcon", Tint, outlined: true, badge, cave);
+}
+
 internal static class MarkerTypes
 {
+    public static readonly ShortcutType Shortcut = new();
+    public static readonly KeyKind Key = new();
+    public static readonly WhisperKind Whisper = new();
     public static readonly ChestKind Chest = new();
     public static readonly SpecialShinyKind SpecialShiny = new();
 
@@ -246,7 +325,7 @@ internal static class MarkerTypes
         new(MarkerGroup.Cooking, "mushroom", "Mushroom", "mushroom", 334358031176021315, 823578215697629511),
         new(MarkerGroup.Cooking, "potato", "Potato", "potato", 2021943158973951263, 858938746346541843),
         new(MarkerGroup.Cooking, "tomato", "Tomato", "tomato", 4122645235203468911, 2699393012938231103),
-        new(MarkerGroup.Valuables, "nettle", "Dire Nettle", "direNettleSpores", 4148592465844323776, 2496325793267758538),
+        new(MarkerGroup.Navigation, "nettle", "Dire Nettle", "direNettleSpores", 4148592465844323776, 2496325793267758538),
     };
 
     /// <summary>The kill challenges' target choices (KillEnemiesRandomized...AllowedEnemyTagChoices), build 29466;
@@ -288,6 +367,9 @@ internal static class MarkerTypes
         all.AddRange(Animals);
         all.Add(Chest);
         all.Add(SpecialShiny);
+        all.Add(Key);
+        all.Add(Whisper);
+        all.Add(Shortcut);
         // Row order (stable sort); in Valuables the chests and shinies before Dire Nettle.
         return System.Linq.Enumerable.ToArray(System.Linq.Enumerable.ThenBy(
             System.Linq.Enumerable.OrderBy(all, t => t.Group), t => t is ResourceType ? 1 : 0));

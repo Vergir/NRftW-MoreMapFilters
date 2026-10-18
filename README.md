@@ -2,7 +2,8 @@
 
 A [MelonLoader](https://github.com/LavaGang/MelonLoader) mod for **No Rest for the Wicked** that adds a Markers panel to the
 map's Filters menu: pick trees, ores, fishing and digging spots, herbs and food, the animals whose parts upgrade gear,
-the enemy factions of the "Kill N" challenges, or treasure chests, and the map shows where they are, with the world's
+the enemy factions of the "Kill N" challenges, treasure chests, keys, undiscovered whispers or unopened shortcuts, and
+the map shows where they are, with the world's
 current state (area variants, harvested / killed / looted spots, caves). Display only; the Quantum simulation is untouched.
 
 Download: [GitHub releases](https://github.com/vergir/NRftW-MapResourceMarkers/releases/latest)
@@ -44,9 +45,10 @@ ends in [docs/internal.md](docs/internal.md).
 | `ShowInUnrevealed` | `true` | Markers in unexplored parts of the map. |
 | `MarkerScale` | `1` | Marker size (0.5..2). |
 | `ShowHarvesting`, `ShowAnimals`, `ShowEnemies` | `true` | Button groups in the panel. |
-| `ShowCooking`, `ShowValuables` | `false` | Button groups in the panel. |
+| `ShowCooking`, `ShowValuables`, `ShowNavigation` | `false` | Button groups in the panel. |
 | `ShowPossible` | `true` | "?" markers (the panel's "?" button). |
 | `Unlocked` | `""` | Per world: types that joined the panel (written by the mod). |
+| `KeysCollected`, `ShortcutsOpened` | `""` | Per world: collected keys / opened shortcuts, hidden for good (written by the mod). |
 | `AddSettingsRows` | `true` | The rows in Options > Gameplay. |
 | `Debug` | `false` | Log details (indexing, area variants, cave rolls, live reads, timings). |
 

@@ -122,8 +122,9 @@ internal static class NodeIndex
             if (shortcutEntries.TryGetValue(e.InstanceGuid, out var sc))
             {
                 setOf.TryGetValue(e.InstanceGuid, out long scSet);
+                // Fog is checked where the marker is drawn: puzzle records sit at (0, 0, 0), one-way doors on the closed side.
                 var at = new Vector3(sc.X, sc.Y, sc.Z);
-                Shortcuts.Add(new MapPoint(MarkerTypes.Shortcut, e.Name ?? "", at, new FPVector2(e.Position.X, e.Position.Z),
+                Shortcuts.Add(new MapPoint(MarkerTypes.Shortcut, e.Name ?? "", at, new FPVector2(FP.FromFloat_UNSAFE(sc.X), FP.FromFloat_UNSAFE(sc.Z)),
                     PointSource.Shortcut, e.InstanceGuid, scSet));
                 ShortcutRecords[e.InstanceGuid] = (e, sc);
                 if (sc.Kind is ShortcutKind.Ladder or ShortcutKind.Trapdoor) ShortcutsAbove.Add(e.InstanceGuid);

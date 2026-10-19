@@ -8,7 +8,8 @@ internal enum ShortcutRecord { Ladder, Door, Lever, Puzzle, Destructible }
 
 /// <summary>
 /// The world's one-way shortcuts, generated from `python tools/shortcuts.py --json` (build 29466; key doors left out, the
-/// Keys filter covers them). Position = where the player must go: a ladder's / trapdoor's top, a one-way door's open
+/// Keys filter covers them; so are the 13 in caves, cellars, houses and the sewer: a dungeon is too small for a shortcut to
+/// matter). Position = where the player must go: a ladder's / trapdoor's top, a one-way door's open
 /// side, a drawbridge's hinge, a gate's lever, a wall itself. Puzzles: OpenMask = bit per state id that means open.
 /// </summary>
 internal static class ShortcutData
@@ -27,8 +28,6 @@ internal static class ShortcutData
         new(1218799478, ShortcutKind.Ladder, ShortcutRecord.Ladder, 463.99f, 116.70f, 321.84f, 0, 0),   // kickdownLadder, mountainPassA
         new(1503429053, ShortcutKind.Ladder, ShortcutRecord.Ladder, 431.78f, 123.25f, 323.67f, 0, 0),   // kickdownLadder, mountainPassA
         new(2145572608, ShortcutKind.Ladder, ShortcutRecord.Ladder, 508.87f, 119.05f, 389.63f, 0, 0),   // kickdownLadder, mountainPassA
-        new(-1249638673, ShortcutKind.Ladder, ShortcutRecord.Ladder, 1911.84f, 34.75f, -1134.78f, 0, 0),   // kickdownLadder, coastTowerCellar
-        new(-307479375, ShortcutKind.Ladder, ShortcutRecord.Ladder, 1313.45f, 35.37f, -1480.38f, 0, 0),   // kickdownLadder, potionSellerCave
         new(-42759271, ShortcutKind.Ladder, ShortcutRecord.Ladder, 51.00f, 23.41f, 122.92f, 0, 0),   // kickdownLadder, outskirtsA
         new(169844264, ShortcutKind.Ladder, ShortcutRecord.Ladder, 104.41f, 65.83f, 156.45f, 0, 0),   // kickdownLadder, outskirtsA
         new(811967372, ShortcutKind.Ladder, ShortcutRecord.Ladder, 126.64f, 51.82f, 89.41f, 0, 0),   // kickdownLadder, outskirtsA
@@ -46,12 +45,7 @@ internal static class ShortcutData
         new(17158463, ShortcutKind.Ladder, ShortcutRecord.Ladder, 174.78f, 92.02f, 401.95f, 0, 0),   // kickdownLadder (2), marinWoodsA
         new(269888460, ShortcutKind.Ladder, ShortcutRecord.Ladder, 185.52f, 65.40f, 427.65f, 0, 0),   // kickdownLadder, marinWoodsA
         new(910650555, ShortcutKind.Ladder, ShortcutRecord.Ladder, 183.92f, 94.79f, 463.82f, 0, 0),   // kickdownLadder (1), marinWoodsA
-        new(876146472, ShortcutKind.Ladder, ShortcutRecord.Ladder, 1703.81f, 25.95f, -1233.33f, 0, 0),   // kickdownLadder, hillsCaveA
         new(-29623864, ShortcutKind.Ladder, ShortcutRecord.Ladder, 252.62f, 69.52f, 381.98f, 0, 0),   // kickdownLadder, marinPathStateChanges
-        new(446493253, ShortcutKind.Ladder, ShortcutRecord.Ladder, 1801.65f, 75.03f, 1050.20f, 0, 0),   // kickdownLadder, sacramentWarRoom
-        new(-1704241553, ShortcutKind.Ladder, ShortcutRecord.Ladder, -95.42f, 40.66f, -1070.28f, 0, 0),   // kickdownLadder (1), sewerDungeonA
-        new(-872485866, ShortcutKind.Ladder, ShortcutRecord.Ladder, -49.31f, 51.22f, -1102.17f, 0, 0),   // kickdownLadder (2), sewerDungeonA
-        new(512578885, ShortcutKind.Ladder, ShortcutRecord.Ladder, -6.82f, 45.15f, -1174.67f, 0, 0),   // kickdownLadder, sewerDungeonA
         new(-470177741, ShortcutKind.Ladder, ShortcutRecord.Ladder, 266.20f, 62.47f, 470.93f, 0, 0),   // kickdownLadder (2), villageArtState
         new(222316991, ShortcutKind.Ladder, ShortcutRecord.Ladder, 233.19f, 58.95f, 546.17f, 0, 0),   // kickdownLadder (3), villageArtState
         new(512016601, ShortcutKind.Ladder, ShortcutRecord.Ladder, 208.57f, 63.35f, 515.71f, 0, 0),   // kickdownLadder (1), villageArtState
@@ -78,7 +72,6 @@ internal static class ShortcutData
         new(1651122447, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 479.14f, 96.58f, 310.52f, 0, 0),   // doorOneHinge, mountainPassA
         new(1843121758, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 460.37f, 83.97f, 207.09f, 0, 0),   // doorOneHinge, mountainPassA
         new(2065801727, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 436.45f, 110.26f, 337.23f, 0, 0),   // doorOneHinge, mountainPassA
-        new(-14039622, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 45.90f, 45.70f, -1058.57f, 0, 0),   // doorOneHinge (1), sewerDungeonDarakBossArena
         new(-1847285199, ShortcutKind.Drawbridge, ShortcutRecord.Door, 214.75f, 53.51f, 3.82f, 0, 0),   // fortressOutskirtsDrawBridge, hillsA
         new(-1573027842, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 102.25f, 63.18f, -70.59f, 0, 0),   // doorLeftHingeWoodA, hillsA
         new(-620216410, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 133.38f, 73.17f, -113.49f, 0, 0),   // doorOneHinge, hillsA
@@ -91,12 +84,10 @@ internal static class ShortcutData
         new(-271786723, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 181.68f, 55.58f, 403.57f, 0, 0),   // doorOneHinge, marinWoodsA
         new(-1975488085, ShortcutKind.Drawbridge, ShortcutRecord.Door, 200.07f, 49.16f, 320.76f, 0, 0),   // drawBridge, marinPathStateChanges
         new(1959039875, ShortcutKind.Drawbridge, ShortcutRecord.Door, 233.10f, 53.92f, 354.15f, 0, 0),   // fortressOutskirtsDrawBridge (1), marinPathStateChanges
-        new(1129746354, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 1789.35f, 25.44f, 309.98f, 0, 0),   // doorOneHinge, mainBucket
         new(-1650038306, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 239.78f, 51.14f, 515.86f, 0, 0),   // doorOneHinge, villageArtState
         new(-958418458, ShortcutKind.Drawbridge, ShortcutRecord.Door, 200.40f, 65.95f, 479.32f, 0, 0),   // fortressOutskirtsDrawBridge, villageArtState
         new(-327031131, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 185.75f, 64.71f, 483.71f, 0, 0),   // doorOneHinge, villageArtState
         new(-438643494, ShortcutKind.Drawbridge, ShortcutRecord.Door, 74.18f, 32.80f, 96.79f, 0, 0),   // fortressOutskirtsDrawBridge, fortressA
-        new(-408922209, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 1531.93f, -5.62f, -873.00f, 0, 0),   // doorOneHinge, hillsCaveB
         new(-2050340882, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 379.21f, 45.19f, 152.23f, 0, 0),   // shipGraveyardDoorA (1), sacramentA
         new(-2022292912, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 363.36f, 48.53f, 75.66f, 0, 0),   // doorOneHinge (3), sacramentA
         new(-1992692394, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 376.82f, 46.43f, 145.03f, 0, 0),   // doorOneHinge (2), sacramentA
@@ -105,7 +96,6 @@ internal static class ShortcutData
         new(2724845, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 171.29f, 42.59f, 247.69f, 0, 0),   // churchStorageDoorA, sacramentA
         new(1648015010, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 377.12f, 40.06f, 120.87f, 0, 0),   // shipGraveyardDoorA, sacramentA
         new(1375053548, ShortcutKind.LeverGate, ShortcutRecord.Lever, 505.11f, 101.06f, 321.39f, 0, 1),   // mountainWallLeverView, mountainPassA
-        new(-1000360982, ShortcutKind.LeverGate, ShortcutRecord.Lever, 1927.26f, 31.32f, -1126.93f, 0, 1),   // wallLeverView, coastTowerCellar
         new(1163983178, ShortcutKind.LeverGate, ShortcutRecord.Lever, -0.60f, 9.67f, 146.34f, 0, 1),   // mountainWallLeverView, outskirtsA
         new(-1805565161, ShortcutKind.LeverGate, ShortcutRecord.Lever, 169.09f, 55.41f, -102.33f, 0, 1),   // fortressWallLeverView, hillsA
         new(-1338187345, ShortcutKind.LeverGate, ShortcutRecord.Lever, 158.63f, 65.97f, -33.15f, 0, 1),   // leverView, hillsA
@@ -114,10 +104,8 @@ internal static class ShortcutData
         new(-1075386827, ShortcutKind.LeverGate, ShortcutRecord.Lever, 210.08f, 73.10f, 436.22f, 0, 1),   // kestrelEggAltarLeverView, marinWoodsA
         new(-836637124, ShortcutKind.LeverGate, ShortcutRecord.Lever, 187.04f, 87.47f, 408.88f, 0, 1),   // leverView, marinWoodsA
         new(1600557213, ShortcutKind.LeverGate, ShortcutRecord.Lever, 186.33f, 48.20f, 355.79f, 0, 1),   // mountainWallLeverView, marinWoodsA
-        new(-1309900188, ShortcutKind.LeverGate, ShortcutRecord.Lever, 17.16f, 35.42f, -1203.27f, 0, 1),   // sewerBrokenWallLeverView, sewerDungeonA
         new(-1391356595, ShortcutKind.LeverGate, ShortcutRecord.Lever, 19.75f, 32.56f, 96.32f, 0, 1),   // fortressBrokenWallLeverView, fortressA
         new(378851690, ShortcutKind.Wall, ShortcutRecord.Destructible, 529.04f, 98.23f, 359.99f, 0, 0),   // destructiblePrisonDoorView, prisonCells
-        new(1078972085, ShortcutKind.Wall, ShortcutRecord.Destructible, 2032.30f, 28.27f, -1318.87f, 0, 0),   // destructiblePlankWall, hillsCaveC
         new(-542045663, ShortcutKind.Wall, ShortcutRecord.Destructible, 529.04f, 98.23f, 359.99f, 0, 0),   // destructiblePrisonDoorView, prisonCells
         new(141015179, ShortcutKind.Wall, ShortcutRecord.Destructible, 200.47f, 64.16f, 50.20f, 0, 0),   // destructibleWoodenWallAOutskirtsView, hillsA
         new(176525282, ShortcutKind.Wall, ShortcutRecord.Destructible, 130.00f, 61.98f, -7.51f, 0, 0),   // destructibleWoodenWallAOutskirtsView, hillsA

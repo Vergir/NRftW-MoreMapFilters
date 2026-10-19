@@ -8,8 +8,7 @@ internal enum ShortcutRecord { Ladder, Door, Lever, Puzzle, Destructible }
 
 /// <summary>
 /// The world's one-way shortcuts, generated from `python tools/shortcuts.py --json` (build 29466; key doors left out, the
-/// Keys filter covers them; so are the 13 in caves, cellars, houses and the sewer: a dungeon is too small for a shortcut to
-/// matter). Position = where the player must go: a ladder's / trapdoor's top, a one-way door's open
+/// Keys filter covers them; so are the 8 in caves, cellars and houses: too small for a shortcut to matter. The sewer's stay). Position = where the player must go: a ladder's / trapdoor's top, a one-way door's open
 /// side, a drawbridge's hinge, a gate's lever, a wall itself. Puzzles: OpenMask = bit per state id that means open.
 /// </summary>
 internal static class ShortcutData
@@ -46,6 +45,9 @@ internal static class ShortcutData
         new(269888460, ShortcutKind.Ladder, ShortcutRecord.Ladder, 185.52f, 65.40f, 427.65f, 0, 0),   // kickdownLadder, marinWoodsA
         new(910650555, ShortcutKind.Ladder, ShortcutRecord.Ladder, 183.92f, 94.79f, 463.82f, 0, 0),   // kickdownLadder (1), marinWoodsA
         new(-29623864, ShortcutKind.Ladder, ShortcutRecord.Ladder, 252.62f, 69.52f, 381.98f, 0, 0),   // kickdownLadder, marinPathStateChanges
+        new(-1704241553, ShortcutKind.Ladder, ShortcutRecord.Ladder, -95.42f, 40.66f, -1070.28f, 0, 0),   // kickdownLadder (1), sewerDungeonA
+        new(-872485866, ShortcutKind.Ladder, ShortcutRecord.Ladder, -49.31f, 51.22f, -1102.17f, 0, 0),   // kickdownLadder (2), sewerDungeonA
+        new(512578885, ShortcutKind.Ladder, ShortcutRecord.Ladder, -6.82f, 45.15f, -1174.67f, 0, 0),   // kickdownLadder, sewerDungeonA
         new(-470177741, ShortcutKind.Ladder, ShortcutRecord.Ladder, 266.20f, 62.47f, 470.93f, 0, 0),   // kickdownLadder (2), villageArtState
         new(222316991, ShortcutKind.Ladder, ShortcutRecord.Ladder, 233.19f, 58.95f, 546.17f, 0, 0),   // kickdownLadder (3), villageArtState
         new(512016601, ShortcutKind.Ladder, ShortcutRecord.Ladder, 208.57f, 63.35f, 515.71f, 0, 0),   // kickdownLadder (1), villageArtState
@@ -72,6 +74,7 @@ internal static class ShortcutData
         new(1651122447, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 479.14f, 96.58f, 310.52f, 0, 0),   // doorOneHinge, mountainPassA
         new(1843121758, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 460.37f, 83.97f, 207.09f, 0, 0),   // doorOneHinge, mountainPassA
         new(2065801727, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 436.45f, 110.26f, 337.23f, 0, 0),   // doorOneHinge, mountainPassA
+        new(-14039622, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 45.90f, 45.70f, -1058.57f, 0, 0),   // doorOneHinge (1), sewerDungeonDarakBossArena
         new(-1847285199, ShortcutKind.Drawbridge, ShortcutRecord.Door, 214.75f, 53.51f, 3.82f, 0, 0),   // fortressOutskirtsDrawBridge, hillsA
         new(-1573027842, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 102.25f, 63.18f, -70.59f, 0, 0),   // doorLeftHingeWoodA, hillsA
         new(-620216410, ShortcutKind.OneWayDoor, ShortcutRecord.Door, 133.38f, 73.17f, -113.49f, 0, 0),   // doorOneHinge, hillsA
@@ -104,6 +107,7 @@ internal static class ShortcutData
         new(-1075386827, ShortcutKind.LeverGate, ShortcutRecord.Lever, 210.08f, 73.10f, 436.22f, 0, 1),   // kestrelEggAltarLeverView, marinWoodsA
         new(-836637124, ShortcutKind.LeverGate, ShortcutRecord.Lever, 187.04f, 87.47f, 408.88f, 0, 1),   // leverView, marinWoodsA
         new(1600557213, ShortcutKind.LeverGate, ShortcutRecord.Lever, 186.33f, 48.20f, 355.79f, 0, 1),   // mountainWallLeverView, marinWoodsA
+        new(-1309900188, ShortcutKind.LeverGate, ShortcutRecord.Lever, 17.16f, 35.42f, -1203.27f, 0, 1),   // sewerBrokenWallLeverView, sewerDungeonA
         new(-1391356595, ShortcutKind.LeverGate, ShortcutRecord.Lever, 19.75f, 32.56f, 96.32f, 0, 1),   // fortressBrokenWallLeverView, fortressA
         new(378851690, ShortcutKind.Wall, ShortcutRecord.Destructible, 529.04f, 98.23f, 359.99f, 0, 0),   // destructiblePrisonDoorView, prisonCells
         new(-542045663, ShortcutKind.Wall, ShortcutRecord.Destructible, 529.04f, 98.23f, 359.99f, 0, 0),   // destructiblePrisonDoorView, prisonCells

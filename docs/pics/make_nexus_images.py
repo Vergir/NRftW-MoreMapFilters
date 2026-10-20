@@ -4,8 +4,8 @@
 * panel.jpg: the Markers panel in the map's Filters menu
 * challenge.jpg: a "Kill N" challenge and the map with that faction's markers
 * caves.jpg, valuables.jpg, navigation.jpg: the map with those markers, captioned
-* minimap.jpg: the markers on the Minimap mod's minimap (crosses, "?", cave badges, height arrows)
-* settings.jpg: the Options rows' live previews
+* minimap.jpg: the markers on the Minimap mod's minimap (its raw shots, the layout of its map-markers.jpg)
+* settings.jpg: the Options rows
 * header.jpg (1300x372): Nexus page header / README top
 
 Raw screenshots (git-ignored, docs/pics/*.png): taken on a 9:8 monitor with the game at 16:9, so crop16x9 finds the
@@ -158,56 +158,51 @@ def map_shot(src, name, title, sub, box=MAP_BOX):
     save(caption(img, title, sub), name)
 
 
+MINIMAP_PICS = os.path.join(HERE, "..", "..", "..", "Minimap", "docs", "pics")
+
+
 def minimap():
-    """The Minimap mod's minimap, enlarged over the blurred scene."""
-    src = shot("07_minimap")
-    w, h = src.size
-    s = h / 1080
-    side, m = SIZE * s, MARGIN * s
-    x1, y1 = w - m, h - m
-    p = side * 0.06
-    mm = src.crop((int(x1 - side - p), int(y1 - side - p), int(x1 + p), int(y1 + p)))
-    size = 860
-    mm = mm.resize((size, size), Image.LANCZOS)
-    img = dim(full("07_minimap").filter(ImageFilter.GaussianBlur(12)), 0.35)
-    img = caption(img, "On the minimap too", "With the Minimap mod: crosses, \"?\", caves and height arrows included")
-    cx, cy = 1340, 610
-    box = (cx - size // 2, cy - size // 2)
-    img = shadow(img, (box[0] - 30, box[1] - 30, box[0] + size + 30, box[1] + size + 30), 45, 230)
-    img.paste(mm, box, round_mask(size, 0.06 / 1.12 + 0.004))
+    """Same layout as the Minimap mod's map-markers.jpg (its raw shots of one spot): the map left, the minimap right."""
+    def mm_shot(name):
+        return crop16x9(Image.open(os.path.join(MINIMAP_PICS, name + ".png")).convert("RGB"))
+    big = mm_shot("05b_map").resize((W, H), Image.LANCZOS)
+    mini = mm_shot("05_map_markers")
+    img = Image.new("RGB", (W, H), (10, 9, 8))
+    win = big.crop((W // 2 - 620, H // 2 - 400, W // 2 + 380, H // 2 + 360)).resize((1000, 760), Image.LANCZOS)
+    img.paste(win, (60, 220))
+    size = 720
+    img = shadow(img, (1130, 230, 1130 + size + 60, 230 + size + 60), 40, 230)
+    w, h = mini.size
+    side, m = SIZE * h / 1080, MARGIN * h / 1080
+    x1, y1, p = w - m, h - m, side * 0.06
+    mm = mini.crop((int(x1 - side - p), int(y1 - side - p), int(x1 + p), int(y1 + p))).resize((size, size), Image.LANCZOS)
+    img.paste(mm, (1160, 260), round_mask(size, 0.06 / 1.12 + 0.004))
     d = ImageDraw.Draw(img)
-    notes = ["Red cross: harvested or killed,", "back when the fog creeps back", "",
-             "\"?\": may be there when you arrive", "", "Doorway badge: inside a cave", "",
-             "Arrows: above or below you"]
-    y = 360
-    for line in notes:
-        d.text((90, y), line, font=font(38, False), fill=WHITE if line and not line.startswith("back") else GREY)
-        y += 56 if line else 30
+    d.text((60, 52), "Goes well with the Minimap mod", font=font(64), fill=WHITE)
+    d.text((63, 140), "A separate mod that puts the map on your HUD: the markers show on it too",
+           font=font(30, False), fill=GOLD)
+    d.text((560, 1050), "Map", font=font(34), fill=GREY, anchor="ms")
+    d.text((1160 + size // 2, 1050), "Minimap", font=font(34), fill=GREY, anchor="ms")
     save(img, "minimap.jpg")
 
 
 def settings():
-    """The description panel of four rows: what each setting changes, live."""
-    img = dim(full("08_settings_category").filter(ImageFilter.GaussianBlur(14)), 0.35)
-    img = caption(img, "Every setting shows what it changes", "A live preview under each description in Options")
-    tiles = [("08_settings_category", "Enemies: the group's markers"),
-             ("09_settings_size", "Marker Size: live while you drag"),
-             ("10_settings_unexplored_on", "Unexplored Areas: On"),
-             ("10b_settings_unexplored_off", "Unexplored Areas: Off")]
-    tw, th = 820, 350
-    for k, (name, label) in enumerate(tiles):
-        src = full(name)
-        # the description column, from the row name to just under the preview
-        # the row name is the first bright text in the description column below the tab bar
-        txt = np.asarray(src.convert("L"))[190:, 1075:1600]
-        rows = np.where(txt.max(axis=1) > 150)[0]
-        top = 190 + int(rows[0]) - 18 if len(rows) else 230
-        tile = src.crop((1060, top, 1060 + tw, top + th))
-        x = 110 + (k % 2) * (tw + 80)
-        y = 245 + (k // 2) * (th + 85)
-        img = shadow(img, (x - 10, y - 10, x + tw + 10, y + th + 10), 25, 220, False)
-        img.paste(tile, (x, y), rounded(tile, 14))
-        ImageDraw.Draw(img).text((x + tw // 2, y + th + 14), label, font=font(30), fill=GREY, anchor="mt")
+    """The Options rows (below the game's tab bar) with Enemies selected, its description showing the group's markers."""
+    src = full("08_settings_category")
+    img = dim(src.filter(ImageFilter.GaussianBlur(16)), 0.3)
+    img = caption(img, "Settings", "Choose the groups, the marker size and markers in unexplored areas")
+    box = (90, 210, 1730, 1040)                       # rows and description, without tabs and footer
+    k = 0.97
+    part = src.crop(box)
+    part = part.resize((int(part.width * k), int(part.height * k)), Image.LANCZOS)
+    at = ((W - part.width) // 2, 240)
+    img = shadow(img, (at[0] - 10, at[1] - 10, at[0] + part.width + 10, at[1] + part.height + 10), 30, 220, False)
+    img.paste(part, at, rounded(part, 16))
+    # a label at the preview: the group's markers under the description
+    d = ImageDraw.Draw(img)
+    px, py = at[0] + int((1080 - box[0]) * k), at[1] + int((480 - box[1]) * k)
+    d.line((px + 60, py + 20, px + 60, py + 90), fill=GOLD, width=3)
+    d.text((px + 20, py + 100), "Live preview of the setting", font=font(34), fill=GOLD)
     save(img, "settings.jpg")
 
 
@@ -235,7 +230,7 @@ def main():
     map_shot("05_valuables", "valuables.jpg", "Valuables",
              "Treasure chests, special shinies and keys (off by default)")
     map_shot("06_navigation", "navigation.jpg", "Navigation",
-             "Whispers you have not found yet, unopened shortcuts with height arrows")
+             "Whispers you have not found yet and shortcuts you have not opened")
     minimap()
     settings()
     header()

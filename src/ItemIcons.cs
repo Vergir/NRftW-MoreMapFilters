@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Il2CppQuantum;
 using UnityEngine;
 
-namespace MapResourceMarkers;
+namespace MapMarkers;
 
 /// <summary>
 /// Item icon sprites (HeroItemDataAsset.ItemIcon) for the resource types. Item assets are loaded on demand: right after
@@ -22,7 +22,7 @@ internal static class ItemIcons
 
         var fromGame = FromGame(itemName, itemGuid);
         var sprite = fromGame ?? FromLoadedAssets(itemName);
-        if (sprite == null) MapResourceMarkersMod.Debug($"Item icon '{itemName}' not available yet; retrying on the next map open.");
+        if (sprite == null) MapMarkersMod.Debug($"Item icon '{itemName}' not available yet; retrying on the next map open.");
         if (sprite != null) Cache[itemName] = sprite;
         return sprite;
     }
@@ -37,7 +37,7 @@ internal static class ItemIcons
         }
         catch (Exception e)
         {
-            MapResourceMarkersMod.Log.Warning($"FindWrapper({itemName}): {e.Message}");
+            MapMarkersMod.Log.Warning($"FindWrapper({itemName}): {e.Message}");
             return null;
         }
     }

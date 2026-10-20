@@ -5,7 +5,7 @@ using Il2CppPhoton.Deterministic;
 using Il2CppQuantum;
 using Il2CppQuantum.StreamingGraph;
 
-namespace MapResourceMarkers;
+namespace MapMarkers;
 
 /// <summary>
 /// Where to hunt the animals that drop upgrade parts (analysis/animal_parts.md). Two kinds of points per AnimalKind:
@@ -185,7 +185,7 @@ internal static class AnimalIndex
             }
         }
         UpdateGates(f, force: true);
-        MapResourceMarkersMod.Debug($"Indexed animal points: {exact} exact, {Points.Count - exact} possible from {Spawners.Count} spawners " +
+        MapMarkersMod.Debug($"Indexed animal points: {exact} exact, {Points.Count - exact} possible from {Spawners.Count} spawners " +
                                       $"(pool {pool.Count} NpcData) in {sw.ElapsedMilliseconds} ms");
         return true;
     }
@@ -205,7 +205,7 @@ internal static class AnimalIndex
                 if (!_gateErrorLogged)
                 {
                     _gateErrorLogged = true;
-                    MapResourceMarkersMod.Log.Warning($"Story gate check failed ({e.GetType().Name}: {e.Message}); treating spawns as unlocked.");
+                    MapMarkersMod.Log.Warning($"Story gate check failed ({e.GetType().Name}: {e.Message}); treating spawns as unlocked.");
                 }
             }
             if (open != npc.Unlocked) { npc.Unlocked = open; changed = true; }
@@ -237,7 +237,7 @@ internal static class AnimalIndex
             foreach (var (kind, rate) in share)
                 if (rate / total >= MinShare) Points.Add(MapPoint.At(kind, sp.Name, sp.Position, PointSource.Spawner, sp.Guid, sp.Set, possible: true));
         }
-        MapResourceMarkersMod.Debug($"Animal points: {Points.Count} ({Exact.Count} exact); {locked} enemy types still story-locked");
+        MapMarkersMod.Debug($"Animal points: {Points.Count} ({Exact.Count} exact); {locked} enemy types still story-locked");
     }
 
     private static bool Matches(Npc npc, List<int> all, List<int> any, List<int> none)

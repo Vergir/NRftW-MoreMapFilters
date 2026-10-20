@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace MapResourceMarkers;
+namespace MapMarkers;
 
 /// <summary>
 /// Crosses right after a kill, a harvest or an opened chest, also with the map closed (the Minimap mod mirrors the
@@ -47,7 +47,7 @@ internal static class LiveUpdates
         string sources = _sources;
         _sources = "";
         ClearedState.RefreshLive(f);
-        MapResourceMarkersMod.Debug($"Live update after {sources}: {ClearedState.GoneCounts()}");
+        MapMarkersMod.Debug($"Live update after {sources}: {ClearedState.GoneCounts()}");
         MapOverlay.RefreshNearHero();
     }
 }

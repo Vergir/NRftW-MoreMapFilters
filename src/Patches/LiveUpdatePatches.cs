@@ -1,7 +1,7 @@
 using HarmonyLib;
 using Il2CppQuantum;
 
-namespace MapResourceMarkers.Patches;
+namespace MapMarkers.Patches;
 
 // The game's moments that clear a marker (see LiveUpdates). Simulation thread: only raise the flag. Several hooks per
 // kind: one may be inlined into its caller in the native build, and a later one then still catches it. None of these take

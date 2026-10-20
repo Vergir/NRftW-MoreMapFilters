@@ -2,7 +2,7 @@ using Il2CppMoon.Forsaken;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace MapResourceMarkers;
+namespace MapMarkers;
 
 /// <summary>
 /// The game's "above / below you" arrow on map icons (MapIcon.HeightIndicatorIcon, e.g. the up arrow next to a fire pit),
@@ -61,14 +61,14 @@ internal static class HeightArrows
                     _size = new Vector2(arrow.rect.width * arrow.lossyScale.x, arrow.rect.height * arrow.lossyScale.y) / picW;
                 }
                 _ready = _up != null && _down != null;
-                MapResourceMarkersMod.Debug($"Height arrows from '{icon.name}': within {_maxDistance:0} m, from {_threshold:0.#} m height difference " +
+                MapMarkersMod.Debug($"Height arrows from '{icon.name}': within {_maxDistance:0} m, from {_threshold:0.#} m height difference " +
                                               $"(full at {_fullOpacityDiff:0.#}), offset {_offset}, size {_size}; up rot {_upRot.eulerAngles} scale {_upScale}, down rot {_downRot.eulerAngles} scale {_downScale}");
                 return;
             }
         }
         catch (System.Exception e)
         {
-            MapResourceMarkersMod.Log.Warning("Reading the game's height indicator: " + e.Message);
+            MapMarkersMod.Log.Warning("Reading the game's height indicator: " + e.Message);
         }
     }
 

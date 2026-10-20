@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
-namespace MapResourceMarkers;
+namespace MapMarkers;
 
 /// <summary>
 /// The selector: a "Markers" panel above the game's Filters menu (mapScreen/mainPane/filterMarkerMenu). The game's row is a
@@ -100,7 +100,7 @@ internal static class FilterRow
         Destroy();
         _screen = screen;
         try { Build(screen); }
-        catch (Exception e) { MapResourceMarkersMod.Log.Error("Building the Markers row: " + e); }
+        catch (Exception e) { MapMarkersMod.Log.Error("Building the Markers row: " + e); }
     }
 
     private static void Build(MapScreen screen)
@@ -187,7 +187,7 @@ internal static class FilterRow
         ApplySprites();
         UpdateButtons();
         UpdateVisibility();
-        MapResourceMarkersMod.Debug($"Markers rows added under '{menu.name}'.");
+        MapMarkersMod.Debug($"Markers rows added under '{menu.name}'.");
     }
 
     /// <summary>
@@ -266,14 +266,14 @@ internal static class FilterRow
         }
         Layout();
         if (added.Count > 0) Prefs.SaveUnlocked();
-        if (added.Count > 0) MapResourceMarkersMod.Log.Msg($"New in the Markers row for this world: {string.Join(", ", added)}");
-        if (known) MapResourceMarkersMod.Debug(empty.Count == 0 ? "Every type in the Markers row has something to show."
+        if (added.Count > 0) MapMarkersMod.Log.Msg($"New in the Markers row for this world: {string.Join(", ", added)}");
+        if (known) MapMarkersMod.Debug(empty.Count == 0 ? "Every type in the Markers row has something to show."
                                                                  : $"Dimmed in the Markers row (nothing to show right now): {string.Join(", ", empty)}");
         var menu = _screen?.MarkerFilters;
         if (_menuWasOpen && menu != null)
         {
             try { LinkNavigation(menu); }
-            catch (Exception e) { MapResourceMarkersMod.Log.Warning("Linking filter navigation: " + e.Message); }
+            catch (Exception e) { MapMarkersMod.Log.Warning("Linking filter navigation: " + e.Message); }
         }
     }
 
@@ -651,7 +651,7 @@ internal static class FilterRow
         if (!open || !Built) return;
         Layout();   // the panel width is known for sure now
         try { LinkNavigation(menu!); }
-        catch (Exception e) { MapResourceMarkersMod.Log.Warning("Linking filter navigation: " + e.Message); }
+        catch (Exception e) { MapMarkersMod.Log.Warning("Linking filter navigation: " + e.Message); }
     }
 
     /// <summary>Original navigation of the game's filter buttons (we change their selectOnUp), restored on unload.</summary>

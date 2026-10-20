@@ -5,7 +5,7 @@ using Il2CppPhoton.Deterministic;
 using Il2CppQuantum;
 using UnityEngine;
 
-namespace MapResourceMarkers;
+namespace MapMarkers;
 
 /// <summary>A way out of an interior: where it leads on a mapped area (the cave mouth / door outside).</summary>
 internal sealed class Exit
@@ -87,7 +87,7 @@ internal static class Entrances
         }
         // A few teleports point at spawn points cut from the game; more missing = probably not loaded yet, retry.
         _unresolved = missing > 4;
-        MapResourceMarkersMod.Debug($"Interior exits: {Exits.Count} to the map from {Candidates.Count} teleports in interiors" +
+        MapMarkersMod.Debug($"Interior exits: {Exits.Count} to the map from {Candidates.Count} teleports in interiors" +
                                       (missing > 0 ? $" ({missing} destinations not found{(_unresolved ? ", retrying on the next map open" : "")})" : ""));
         return rebuild || Exits.Count != before;
     }

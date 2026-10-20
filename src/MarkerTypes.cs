@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace MapResourceMarkers;
+namespace MapMarkers;
 
 /// <summary>
 /// Segments of the Markers row, in row order. Each belongs to one or two settings categories (MarkerCategory); dots
@@ -70,7 +70,7 @@ internal static class MarkerGroups
         MarkerCategory.Navigation =>
             "Map marker buttons for whispers you have not found yet, shortcuts you have not opened yet and Dire Nettles. " +
             "Shows the way: this might spoil the fun of discovery.",
-        _ => "Map marker buttons for treasure chests, special (orange) shinies and keys. Shows where loot is: " +
+        _ => "Map marker buttons for treasure chests, special (orange) shinies, keys and the doors they open. Shows where loot is: " +
              "this might feel like cheating or spoil the fun of exploring.",
     };
 

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace MapResourceMarkers;
+namespace MapMarkers;
 
 /// <summary>
 /// Map marker sprites baked once per type from the item icon (style "B" picked by the user from mockups): the item picture
@@ -68,7 +68,7 @@ internal static class MarkerArt
         }
         catch (Exception e)
         {
-            MapResourceMarkersMod.Log.Warning($"Baking the {key} marker failed ({e.Message}); using the plain item picture.");
+            MapMarkersMod.Log.Warning($"Baking the {key} marker failed ({e.Message}); using the plain item picture.");
             return icon;
         }
     }
@@ -91,7 +91,7 @@ internal static class MarkerArt
         }
         catch (Exception e)
         {
-            MapResourceMarkersMod.Log.Warning($"Baking the {key} marker failed ({e.Message}); using the plain glyph.");
+            MapMarkersMod.Log.Warning($"Baking the {key} marker failed ({e.Message}); using the plain glyph.");
             return glyph;
         }
     }

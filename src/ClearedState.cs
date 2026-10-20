@@ -5,7 +5,7 @@ using Il2CppInterop.Runtime;
 using Il2CppQuantum;
 using UnityEngine;
 
-namespace MapResourceMarkers;
+namespace MapMarkers;
 
 /// <summary>
 /// Which map points are cleared right now: harvested resource nodes, dead fixed enemies, spawners whose enemy was killed
@@ -116,7 +116,7 @@ internal static class ClearedState
             if (open) ShortcutsOpen.Add(guid);
         }
         if (remembered) MelonLoader.MelonPreferences.Save();
-        MapResourceMarkersMod.Debug($"Shortcuts: {ShortcutsOpen.Count} of {NodeIndex.ShortcutRecords.Count} opened in this world");
+        MapMarkersMod.Debug($"Shortcuts: {ShortcutsOpen.Count} of {NodeIndex.ShortcutRecords.Count} opened in this world");
     }
 
     private static readonly HashSet<string> GuardLogged = new();
@@ -127,7 +127,7 @@ internal static class ClearedState
         try { read(f); }
         catch (Exception e)
         {
-            if (GuardLogged.Add(what)) MapResourceMarkersMod.Log.Warning($"Reading {what} failed ({e.GetType().Name}: {e.Message}).");
+            if (GuardLogged.Add(what)) MapMarkersMod.Log.Warning($"Reading {what} failed ({e.GetType().Name}: {e.Message}).");
         }
     }
 
@@ -173,7 +173,7 @@ internal static class ClearedState
             }
             else if (!RespawnablesAPI.DoesPassSpawnRequirements(f, new IRespawnableEntity(kv.Value.Pointer))) KeysGone.Add(pickup);
         }
-        MapResourceMarkersMod.Debug($"Keys: {KeysGone.Count} of {NodeIndex.KeyData.Count} taken, {KeyDoorsPending.Count} doors still to open");
+        MapMarkersMod.Debug($"Keys: {KeysGone.Count} of {NodeIndex.KeyData.Count} taken, {KeyDoorsPending.Count} doors still to open");
         if (remembered) MelonLoader.MelonPreferences.Save();
     }
 
@@ -301,14 +301,14 @@ internal static class ClearedState
             if (!_timingLogged)
             {
                 _timingLogged = true;
-                MapResourceMarkersMod.Debug($"Cleared state: save read in {saved:F1} ms, {loaded} loaded nodes read live, nodes done at {nodesDone:F1}, enemies done at {enemiesDone:F1}, total {sw.Elapsed.TotalMilliseconds:F1} ms");
+                MapMarkersMod.Debug($"Cleared state: save read in {saved:F1} ms, {loaded} loaded nodes read live, nodes done at {nodesDone:F1}, enemies done at {enemiesDone:F1}, total {sw.Elapsed.TotalMilliseconds:F1} ms");
             }
         }
         catch (Exception e)
         {
             if (_errorLogged) return;
             _errorLogged = true;
-            MapResourceMarkersMod.Log.Warning($"Reading cleared spawns failed ({e.GetType().Name}: {e.Message}); markers stay uncrossed.");
+            MapMarkersMod.Log.Warning($"Reading cleared spawns failed ({e.GetType().Name}: {e.Message}); markers stay uncrossed.");
         }
     }
 
@@ -328,7 +328,7 @@ internal static class ClearedState
         {
             if (_errorLogged) return;
             _errorLogged = true;
-            MapResourceMarkersMod.Log.Warning($"Reading cleared spawns failed ({e.GetType().Name}: {e.Message}); markers stay uncrossed.");
+            MapMarkersMod.Log.Warning($"Reading cleared spawns failed ({e.GetType().Name}: {e.Message}); markers stay uncrossed.");
         }
     }
 
@@ -446,7 +446,7 @@ internal static class ClearedState
         if (counts != _lastCounts)
         {
             _lastCounts = counts;
-            MapResourceMarkersMod.Debug($"Loaded enemy spawns read live: {placements} placements ({deadPlacements} dead), " +
+            MapMarkersMod.Debug($"Loaded enemy spawns read live: {placements} placements ({deadPlacements} dead), " +
                                           $"{spawners} spawners ({deadSpawners} cleared), {chests} chests ({openChests} open); {looked} placements looked up in {tPlacements:F1} ms, " +
                                           $"{objects.Count} spawned objects in {tObjects:F1} ms, total {sw.Elapsed.TotalMilliseconds:F1} ms (component lookup {tIndex:F1} ms)");
         }

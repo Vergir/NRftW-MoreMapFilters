@@ -1,4 +1,4 @@
-# Map Resource Markers: internals
+# Map Markers: internals
 
 Verified in game for 1.0.0 (2026-10-19). Build 29466 (Steam). RVAs from `reference/dump.cs` in the workspace root; the
 `analysis/*.md` files named below are in the workspace root too (research notes with tools in `tools/`).
@@ -7,7 +7,7 @@ Verified in game for 1.0.0 (2026-10-19). Build 29466 (Steam). RVAs from `referen
 
 | File | What |
 |---|---|
-| `MapResourceMarkersMod.cs` | Entry point: prefs, Harmony (`HarmonyDontPatchAll` + own `PatchAll`), settings rows, per-frame `MapOverlay.Sync` / `LiveUpdates.Tick` / `MapOverlay.LateUpdate` / `FilterRow.Tick`, `MapScreen.Show` and teleport hooks, unload. `Debug()` logs only with `Debug = true`. |
+| `MapMarkersMod.cs` | Entry point: prefs, Harmony (`HarmonyDontPatchAll` + own `PatchAll`), settings rows, per-frame `MapOverlay.Sync` / `LiveUpdates.Tick` / `MapOverlay.LateUpdate` / `FilterRow.Tick`, `MapScreen.Show` and teleport hooks, unload. `Debug()` logs only with `Debug = true`. |
 | `MarkerTypes.cs` | `MarkerGroup` (row segments), `MarkerCategory` (settings), `MarkerType` and its kinds (`ResourceType`, `EnemyKind`, `AnimalKind`, `ChestKind`, `SpecialShinyKind`), the catalogue with all guids. |
 | `NodeIndex.cs` | `MapPoint`, `PointSource`; resource nodes, ground pickups and static chests from the linked entities, with their content set. |
 | `EnemyIndex.cs` | Enemy spawn points, chest and special-shiny spawners; area buckets, variants, eligibility, locks, quest pins: `State()`. |
@@ -187,7 +187,11 @@ the nugget guid is raw @+0x20 of the payload). One is eligible when `Weight > 0 
 ## Settings and language
 
 * Options > Gameplay rows via the shared kit (`src/Shared/SettingsRowsKit.cs`, vendored): unexplored areas, marker size,
-  one checkbox per category.
+  one checkbox per category. `SettingsPreview` draws a live picture under the hovered row's description (the
+  controls' `m_settingNameText` / `m_specificationText`; the row is recognized by its name): the category's markers
+  while it is on, markers at the chosen size, a strip of explored land and fog with markers on both sides (the fogged
+  ones only while "unexplored areas" is on). The test builds were "Map Resource Markers": `Prefs.CarryOver` copies a
+  lone `[MapResourceMarkers]` section to `[MapMarkers]` once.
 * `Localization`: in English the mod's labels; otherwise the game's texts (enemy type names, item names via
   `HeroItemDataAsset.ItemNameMsg`, animals = their skull item, digging spots = the dig prompt "Dig",
   `LinkedFarmableResourceDataAsset` 964127749868152500 `.LocalizedShortenedHasToolHint`).

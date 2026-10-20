@@ -1,7 +1,7 @@
 using HarmonyLib;
 using Il2CppMoon.Forsaken;
 
-namespace MapResourceMarkers.Patches;
+namespace MapMarkers.Patches;
 
 // Gamepad / keyboard navigation into the Resources row (see FilterRow class remarks). Prefixes return false when our row
 // handled the press. OnSubmit and the parameterless ToggleFilterOption share one native body, so patching OnSubmit

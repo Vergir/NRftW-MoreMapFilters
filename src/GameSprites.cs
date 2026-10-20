@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace MapResourceMarkers;
+namespace MapMarkers;
 
 /// <summary>Loaded game sprites by name (e.g. the map glyphs SkullMapIcon, QuestionMapIcon). A scan of all loaded sprites
 /// caches every name it sees; a name still missing is rescanned at most every 30 s.</summary>
@@ -18,7 +18,7 @@ internal static class GameSprites
         foreach (var sprite in Resources.FindObjectsOfTypeAll<Sprite>())
             if (sprite != null) Cache[sprite.name] = sprite;
         if (Cache.TryGetValue(name, out s) && s != null) return s;
-        MapResourceMarkersMod.Debug($"Sprite '{name}' not loaded yet; retrying later.");
+        MapMarkersMod.Debug($"Sprite '{name}' not loaded yet; retrying later.");
         return null;
     }
 }

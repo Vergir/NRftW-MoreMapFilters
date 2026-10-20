@@ -8,7 +8,7 @@ the enemy factions of the "Kill N" challenges, treasure chests, keys, undiscover
 the map shows where they are, with the world's
 current state (area variants, harvested / killed / looted spots, caves). Display only; the Quantum simulation is untouched.
 
-Download: [GitHub releases](https://github.com/vergir/NRftW-MoreMapFilters/releases/latest)
+Download: [Nexus Mods](https://www.nexusmods.com/norestforthewicked/mods/121) · [GitHub releases](https://github.com/vergir/NRftW-MoreMapFilters/releases/latest)
 
 What players see is described on the Nexus page ([docs/nexus-description.bbcode](docs/nexus-description.bbcode)); how enemy
 spawns work, for players, in [docs/enemy-spawns.md](docs/enemy-spawns.md); the traced game code, data sources and dead

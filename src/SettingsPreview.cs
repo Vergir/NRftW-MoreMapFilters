@@ -174,6 +174,7 @@ internal static class SettingsPreview
     private static bool Strip(RectTransform root, float width, bool showFogged, float scale)
     {
         var bg = Image(root, FogSprite(), new Vector2(width * 0.5f, -StripHeight * 0.5f), 0f);
+        bg.preserveAspect = false;   // stretched over the whole width: the marker spots are fractions of it
         bg.rectTransform.sizeDelta = new Vector2(width, StripHeight);
         var samples = SizeSamples();
         // (fraction of the width, of the height, fogged)

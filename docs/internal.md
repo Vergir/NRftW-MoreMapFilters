@@ -60,11 +60,15 @@ loaded or not (verified by the probe mod, see `analysis/repeatable_quests.md` 3.
 * **Special shinies** (`analysis/shinies.md`): spawners tagged SpecialShiny 20009 (63 spots); mixed ones "possible".
   Normal (blue) shinies are not shown.
 * **Keys** (`analysis/keys.md`): the 12 key / handle pickups (static genericPickupData containers, `KeyKind.Pickups`:
-  container -> key item, door puzzle). Gone for good when the door puzzle left state 0 (1 key taken, 2 door opened; save
-  `PuzzleData.EcsPersistentData` State @0x18, live `PuzzleAPI.GetStateId`), the key is in the world's key inventory
-  (`InventoryAPI.GetItemMatchingCount(f, f.InventorySystem.RealmInventoryOwner, key, false)`) or
-  `RespawnablesAPI.DoesPassSpawnRequirements` fails; remembered per world (`KeysCollected`). Verified in the user's
-  end-game world (all 12 gone, each by consistent checks).
+  container -> key item, door puzzle; `KeyKind.Doors`: what it opens). Taken = the door puzzle left state 0 (1 key taken,
+  2 door opened; save `PuzzleData.EcsPersistentData` State @0x18, live `PuzzleAPI.GetStateId`) or the key is in the
+  world's key inventory (`InventoryAPI.GetItemMatchingCount(f, f.InventorySystem.RealmInventoryOwner, key, false)`).
+  A taken key's marker moves to its door (`NodeIndex.KeyDoors`, PointSource.KeyDoor) until it is open: puzzle state 2,
+  or for the two keys without a puzzle the door / lever record's `IsTriggered(f)` (Rusted Barnacle Key: the tower
+  cellar door; Sewer Lever Handle: only its single-use broken wall lever, the other three are pulled again and again).
+  Open = remembered per world (`KeysUsed`; the earlier `KeysCollected` recorded taken keys and is no longer read). A key
+  not taken whose pickup fails `RespawnablesAPI.DoesPassSpawnRequirements` is not there now (Western Bridge Key outside
+  its quest). After a hook the keys are redrawn whatever their distance (the door can be ~100 m from the pickup).
 * **Undiscovered whispers** (`analysis/whispers.md`): `CerimWhisperStaticInstanceData` (27; Sacrament's always counts as
   activated). Activated = `Il2Cpp.CerimWhisperViewAPI.IsActivated(f, data)` (per world); hook
   `CerimWhisperAPI.SetActivationState`. Ignore fog; drawn on a second root after the game's icons (`MRM_MarkersTop`):

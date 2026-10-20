@@ -265,6 +265,27 @@ internal sealed class KeyKind : MarkerType
         [-420189775] = (3315036590781135408, 1893189398),    // Windmill Key, Lowland Meadows
     };
 
+    /// <summary>
+    /// Pickup InstanceGuid -> what the key opens (analysis/keys.md 3): drawn there once the key is taken, until it is open.
+    /// Lock = 0: the door puzzle's state says (2 = open); else the door / lever record's IsTriggered. The Sewer Lever
+    /// Handle's other three levers (platforms, water) can be pulled again and again: only the single-use one counts.
+    /// </summary>
+    public static readonly Dictionary<long, (long Lock, float X, float Y, float Z)> Doors = new()
+    {
+        [-223405633] = (0, -33.45f, 40.69f, -1202.79f),            // drainage cellar door
+        [1710656204] = (0, -3.02f, 26.07f, 74.27f),                // mess hall door
+        [-1115910626] = (0, 435.53f, 83.28f, 203.29f),             // cottage door
+        [-781804684] = (0, 551.56f, 105.64f, 383.02f),             // Finley's cell door
+        [1620124048] = (1794894650, 1911.28f, 24.24f, -1117.73f),  // tower cellar door (drawn at the cellar's mouth)
+        [-849635468] = (0, 204.67f, 46.56f, 304.95f),              // door to the Sacrament graveyard
+        [-885908055] = (-1309900188, 17.16f, 35.42f, -1203.27f),   // the sewer's broken wall lever
+        [-268803067] = (0, 13.92f, 26.94f, 100.17f),               // storage room door
+        [-1161991649] = (0, -71.15f, 38.42f, -1199.65f),           // water channel door
+        [139066641] = (0, 279.1f, 44.87f, 329.51f),                // watermill door
+        [1032491712] = (0, -56.9f, 42.18f, 91.25f),                // western bridge door
+        [-420189775] = (0, 195.64f, 53.87f, 34.86f),               // windmill door
+    };
+
     public KeyKind() : base("keys", "Keys", MarkerGroup.Valuables) { }
 
     private const string Glyph = "uiInventoryTabKeyIcon";

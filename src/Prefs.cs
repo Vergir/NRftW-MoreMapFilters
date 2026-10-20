@@ -16,7 +16,7 @@ internal static class Prefs
     public static MelonPreferences_Entry<bool> Debug = null!;
     public static MelonPreferences_Entry<string> Unlocked = null!;
     public static MelonPreferences_Entry<bool> ShowPossible = null!;
-    public static MelonPreferences_Entry<string> CollectedKeys = null!;
+    public static MelonPreferences_Entry<string> UsedKeys = null!;
     public static MelonPreferences_Entry<string> OpenedShortcuts = null!;
     private static readonly Dictionary<MarkerCategory, MelonPreferences_Entry<bool>> Categories = new();
 
@@ -56,9 +56,9 @@ internal static class Prefs
         ShowPossible = cat.CreateEntry("ShowPossible", true,
             description: "Show \"?\" markers (spots that only may have the type when you get there). Toggled by the \"?\" " +
                          "button next to the Markers title in the map's Filters menu.");
-        // "CollectedKeys" (first build) wrongly recorded every key: a new key starts clean.
-        CollectedKeys = cat.CreateEntry("KeysCollected", "",
-            description: "Per world: key pickups already collected (hidden from the map for good). Written by the mod.");
+        // "CollectedKeys" / "KeysCollected" (earlier builds) recorded taken keys, before their doors were drawn.
+        UsedKeys = cat.CreateEntry("KeysUsed", "",
+            description: "Per world: keys whose door is open (key and door hidden from the map for good). Written by the mod.");
         OpenedShortcuts = cat.CreateEntry("ShortcutsOpened", "",
             description: "Per world: shortcuts already opened (hidden from the map for good). Written by the mod.");
         Unlocked = cat.CreateEntry("Unlocked", "",
@@ -108,13 +108,13 @@ internal static class Prefs
     public static void SaveUnlocked() => MelonPreferences.Save();
 
     private static PerWorldSet? _keys, _shortcuts;
-    private static PerWorldSet Keys => _keys ??= new PerWorldSet(CollectedKeys);
+    private static PerWorldSet Keys => _keys ??= new PerWorldSet(UsedKeys);
     private static PerWorldSet Shortcuts => _shortcuts ??= new PerWorldSet(OpenedShortcuts);
 
-    /// <summary>Key pickups collected in this world (KeyKind): a safety net, they never come back.</summary>
-    public static bool IsKeyCollected(string world, long pickup) => Keys.Contains(world, pickup);
+    /// <summary>Keys whose door is open in this world (KeyKind): a safety net, nothing of them comes back.</summary>
+    public static bool IsKeyUsed(string world, long pickup) => Keys.Contains(world, pickup);
     /// <summary>True when newly remembered (save the preferences after a batch).</summary>
-    public static bool RememberKeyCollected(string world, long pickup) => Keys.Add(world, pickup);
+    public static bool RememberKeyUsed(string world, long pickup) => Keys.Add(world, pickup);
 
     /// <summary>Shortcuts opened in this world: hidden for good (Faith and Flame raises a few ladders again).</summary>
     public static bool IsShortcutOpened(string world, long guid) => Shortcuts.Contains(world, guid);

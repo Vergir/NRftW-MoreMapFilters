@@ -54,11 +54,19 @@ internal static class ClearedState
 
     public static bool IsActivated(long whisper) => ActivatedWhispers.Contains(whisper);
 
+    /// <summary>For the log: whispers activated, keys collected, shortcuts opened.</summary>
+    public static string GoneCounts() => $"whispers {ActivatedWhispers.Count}, keys {KeysGone.Count}, doors {KeyDoorsPending.Count}, shortcuts {ShortcutsOpen.Count}";
+
     /// <summary>Key pickups that are gone for good (see KeyKind), and the door puzzles' saved states.</summary>
     private static readonly HashSet<long> KeysGone = new();
     private static readonly Dictionary<long, long> PuzzleStates = new();
 
     public static bool IsKeyGone(long pickup) => KeysGone.Contains(pickup);
+
+    /// <summary>Keys taken whose door is not open yet: their door gets the marker (NodeIndex.KeyDoors).</summary>
+    private static readonly HashSet<long> KeyDoorsPending = new();
+
+    public static bool IsKeyDoorPending(long pickup) => KeyDoorsPending.Contains(pickup);
 
     /// <summary>Opened shortcuts (ShortcutData) and broken walls from the save.</summary>
     private static readonly HashSet<long> ShortcutsOpen = new(), BrokenWalls = new();
@@ -123,9 +131,17 @@ internal static class ClearedState
         }
     }
 
+    /// <summary>
+    /// Per key (KeyKind): taken = its door puzzle left the first state (0 = key there, 1 = key taken, 2 = door open; live
+    /// while loaded, else saved, -2 = no record: not touched) or the key is in the world's key items; open = puzzle state 2,
+    /// or for the two keys without a puzzle their door / lever record's IsTriggered. Taken and not open: the marker moves
+    /// to the door. Open: nothing left, remembered per world. A pickup that fails the game's spawn conditions is not there
+    /// now (the Western Bridge Key outside its quest).
+    /// </summary>
     private static void ReadKeys(Frame f)
     {
         KeysGone.Clear();
+        KeyDoorsPending.Clear();
         if (NodeIndex.KeyData.Count == 0) return;
         string world = FilterRow.World();
         var owner = f.InventorySystem.RealmInventoryOwner;
@@ -133,28 +149,39 @@ internal static class ClearedState
         foreach (var kv in NodeIndex.KeyData)
         {
             long pickup = kv.Key;
+            if (Prefs.IsKeyUsed(world, pickup)) { KeysGone.Add(pickup); continue; }
             var (item, puzzle) = KeyKind.Pickups[pickup];
-            bool known = Prefs.IsKeyCollected(world, pickup);
             long state = -1;
-            bool live = false;
             if (puzzle != 0)
             {
-                // Door puzzle: 0 = key not taken, 1 = key taken, 2 = door opened (verified in game); its live state
-                // while loaded, else the saved one (-2 = no record: not touched).
                 var e = IdentityComponentAPI.ResolveEntity(f, puzzle);
-                live = f.Exists(e);
-                state = live ? PuzzleAPI.GetStateId(f, e) : PuzzleStates.TryGetValue(puzzle, out long saved) ? saved : -2;
+                state = f.Exists(e) ? PuzzleAPI.GetStateId(f, e) : PuzzleStates.TryGetValue(puzzle, out long saved) ? saved : -2;
             }
             var keyRef = new AssetRefHeroItemData { Id = new AssetGuid(item) };
-            int owned = InventoryAPI.GetItemMatchingCount(f, owner, keyRef, false);
-            bool spawnable = RespawnablesAPI.DoesPassSpawnRequirements(f, new IRespawnableEntity(kv.Value.Pointer));
-            bool gone = known || (puzzle != 0 && state > 0) || owned >= 1 || !spawnable;
-            if (!gone) continue;
-            KeysGone.Add(pickup);
-            remembered |= Prefs.RememberKeyCollected(world, pickup);
+            bool taken = state >= 1 || InventoryAPI.GetItemMatchingCount(f, owner, keyRef, false) >= 1;
+            bool open = puzzle != 0 ? state >= 2
+                      : KeyKind.Doors.TryGetValue(pickup, out var door) && LockOpen(f, door.Lock);
+            if (open)
+            {
+                KeysGone.Add(pickup);
+                remembered |= Prefs.RememberKeyUsed(world, pickup);
+            }
+            else if (taken)
+            {
+                KeysGone.Add(pickup);
+                KeyDoorsPending.Add(pickup);
+            }
+            else if (!RespawnablesAPI.DoesPassSpawnRequirements(f, new IRespawnableEntity(kv.Value.Pointer))) KeysGone.Add(pickup);
         }
-        MapResourceMarkersMod.Debug($"Keys: {KeysGone.Count} of {NodeIndex.KeyData.Count} collected in this world");
+        MapResourceMarkersMod.Debug($"Keys: {KeysGone.Count} of {NodeIndex.KeyData.Count} taken, {KeyDoorsPending.Count} doors still to open");
         if (remembered) MelonLoader.MelonPreferences.Save();
+    }
+
+    private static bool LockOpen(Frame f, long guid)
+    {
+        if (!NodeIndex.KeyLocks.TryGetValue(guid, out var record)) return false;
+        return record.TryCast<DoorStaticInstanceData>()?.IsTriggered(f)
+               ?? record.TryCast<LeverStaticInstanceData>()?.IsTriggered(f) ?? false;
     }
 
     private static void ReadWhispers(Frame f)

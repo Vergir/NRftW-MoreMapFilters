@@ -48,7 +48,7 @@ ends in [docs/internal.md](docs/internal.md).
 | `ShowCooking`, `ShowValuables`, `ShowNavigation` | `false` | Button groups in the panel. |
 | `ShowPossible` | `true` | "?" markers (the panel's "?" button). |
 | `Unlocked` | `""` | Per world: types that joined the panel (written by the mod). |
-| `KeysCollected`, `ShortcutsOpened` | `""` | Per world: collected keys / opened shortcuts, hidden for good (written by the mod). |
+| `KeysUsed`, `ShortcutsOpened` | `""` | Per world: keys whose door is open / opened shortcuts, hidden for good (written by the mod). |
 | `AddSettingsRows` | `true` | The rows in Options > Gameplay. |
 | `Debug` | `false` | Log details (indexing, area variants, cave rolls, live reads, timings). |
 

@@ -423,7 +423,8 @@ internal static class MapOverlay
         var f = showUnrevealed ? null : frame;
         foreach (var m in Markers)
         {
-            if (near is Vector3 n)
+            // Keys always: a taken key's marker moves to its door, which can be far from the pickup (a dozen markers).
+            if (near is Vector3 n && m.Type is not KeyKind)
             {
                 float dx = m.Place.Position.x - n.x, dz = m.Place.Position.z - n.z;   // plain floats: Vector3 ops go through interop
                 float r = m.Type is EnemyKind or AnimalKind ? ClearedState.HookEnemyRange : ClearedState.HookRange;
@@ -440,7 +441,8 @@ internal static class MapOverlay
                     var state = EnemyIndex.State(p.ContentSet);
                     if (state == EnemyIndex.SpawnState.Hidden) continue;
                     if (p.Source == PointSource.Whisper && ClearedState.IsActivated(p.EntityId)) continue;   // found: gone
-                    if (p.Source == PointSource.Key && ClearedState.IsKeyGone(p.EntityId)) continue;        // collected: gone
+                    if (p.Source == PointSource.Key && ClearedState.IsKeyGone(p.EntityId)) continue;        // taken: gone
+                    if (p.Source == PointSource.KeyDoor && !ClearedState.IsKeyDoorPending(p.EntityId)) continue;   // key not taken / door open
                     if (p.Source == PointSource.Shortcut && ClearedState.IsShortcutOpen(p.EntityId)) continue;   // opened: gone
                     // Chests in a plague safe haven (Sacrament) never come back once opened (seen in game): hide them.
                     if (p.Source is PointSource.Chest or PointSource.ChestSpawner && EnemyIndex.InSafeHaven(p.ContentSet)
@@ -501,6 +503,7 @@ internal static class MapOverlay
         AllPoints.AddRange(EnemyIndex.SpecialShinies);
         AllPoints.AddRange(NodeIndex.Whispers);
         AllPoints.AddRange(NodeIndex.Keys);
+        AllPoints.AddRange(NodeIndex.KeyDoors);
         AllPoints.AddRange(NodeIndex.Shortcuts);
         var available = new HashSet<MarkerType>();
         var eligible = new HashSet<MarkerType>();
@@ -510,6 +513,7 @@ internal static class MapOverlay
             var state = EnemyIndex.State(p.ContentSet);
             if (p.Source == PointSource.Whisper && ClearedState.IsActivated(p.EntityId)) state = EnemyIndex.SpawnState.Hidden;
             if (p.Source == PointSource.Key && ClearedState.IsKeyGone(p.EntityId)) state = EnemyIndex.SpawnState.Hidden;
+            if (p.Source == PointSource.KeyDoor && !ClearedState.IsKeyDoorPending(p.EntityId)) state = EnemyIndex.SpawnState.Hidden;
             if (p.Source == PointSource.Shortcut && ClearedState.IsShortcutOpen(p.EntityId)) state = EnemyIndex.SpawnState.Hidden;
             bool live = Prefs.ShowPossible.Value ? state != EnemyIndex.SpawnState.Hidden
                                                  : state == EnemyIndex.SpawnState.Plain && !p.Possible;
@@ -651,7 +655,7 @@ internal static class MapOverlay
         Built.Add(type);
         var points = type is EnemyKind ? EnemyIndex.Points : type is AnimalKind ? AnimalIndex.Points
             : type is ChestKind ? ChestPoints() : type is SpecialShinyKind ? EnemyIndex.SpecialShinies
-            : type is WhisperKind ? NodeIndex.Whispers : type is KeyKind ? NodeIndex.Keys
+            : type is WhisperKind ? NodeIndex.Whispers : type is KeyKind ? KeyPoints()
             : type is ShortcutType ? NodeIndex.Shortcuts : NodeIndex.Nodes;
         var caves = new Dictionary<Exit, Marker>();
         int n = 0, inCaves = 0;
@@ -673,6 +677,13 @@ internal static class MapOverlay
         }
         if (n > 0 && type is not ResourceType || caves.Count > 0)
             MapResourceMarkersMod.Debug($"{type.Label}: {n} markers created ({inCaves} points in {caves.Count} caves at their entrances).");
+    }
+
+    private static List<MapPoint> KeyPoints()
+    {
+        var list = new List<MapPoint>(NodeIndex.Keys);
+        list.AddRange(NodeIndex.KeyDoors);
+        return list;
     }
 
     private static List<MapPoint> ChestPoints()

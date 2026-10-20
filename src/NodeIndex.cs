@@ -16,6 +16,7 @@ internal enum PointSource
     ChestSpawner,// DynamicSpawnerData.Guid of a chest spawner
     Whisper,     // CerimWhisperStaticInstanceData.InstanceGuid
     Key,         // the key pickup container's InstanceGuid
+    KeyDoor,     // what a taken key opens (KeyKind.Doors); EntityId = the key pickup's InstanceGuid
     Shortcut,    // the shortcut record's InstanceGuid (ShortcutData)
 }
 
@@ -69,6 +70,9 @@ internal static class NodeIndex
     /// <summary>Key pickups, with their container data (RespawnablesAPI.DoesPassSpawnRequirements takes it).</summary>
     public static readonly List<MapPoint> Keys = new();
     public static readonly Dictionary<long, ContainerStaticInstanceData> KeyData = new();
+    /// <summary>The doors of taken keys (KeyKind.Doors), and the door / lever records of the keys without a puzzle.</summary>
+    public static readonly List<MapPoint> KeyDoors = new();
+    public static readonly Dictionary<long, LinkedEntityInstanceData> KeyLocks = new();
     /// <summary>Shortcuts (ShortcutData) with their records; Above = reached from the top (ladders, trapdoors).</summary>
     public static readonly List<MapPoint> Shortcuts = new();
     public static readonly Dictionary<long, (LinkedEntityInstanceData Record, ShortcutData.Entry Entry)> ShortcutRecords = new();
@@ -92,6 +96,10 @@ internal static class NodeIndex
         WhisperData.Clear();
         Keys.Clear();
         KeyData.Clear();
+        KeyDoors.Clear();
+        KeyLocks.Clear();
+        var lockGuids = new HashSet<long>();
+        foreach (var door in KeyKind.Doors.Values) if (door.Lock != 0) lockGuids.Add(door.Lock);
         Shortcuts.Clear();
         ShortcutRecords.Clear();
         ShortcutsAbove.Clear();
@@ -119,6 +127,7 @@ internal static class NodeIndex
         {
             var e = all[i];
             if (e == null) continue;
+            if (lockGuids.Contains(e.InstanceGuid)) KeyLocks[e.InstanceGuid] = e;   // may be a shortcut too
             if (shortcutEntries.TryGetValue(e.InstanceGuid, out var sc))
             {
                 setOf.TryGetValue(e.InstanceGuid, out long scSet);
@@ -146,6 +155,10 @@ internal static class NodeIndex
                     setOf.TryGetValue(e.InstanceGuid, out long keySet);
                     Keys.Add(MapPoint.At(MarkerTypes.Key, e.Name, e.Position, PointSource.Key, e.InstanceGuid, keySet));
                     KeyData[e.InstanceGuid] = container;
+                    if (KeyKind.Doors.TryGetValue(e.InstanceGuid, out var door))
+                        KeyDoors.Add(new MapPoint(MarkerTypes.Key, e.Name ?? "", new Vector3(door.X, door.Y, door.Z),
+                            new FPVector2(FP.FromFloat_UNSAFE(door.X), FP.FromFloat_UNSAFE(door.Z)), PointSource.KeyDoor,
+                            e.InstanceGuid, keySet));
                     continue;
                 }
                 if (System.Array.IndexOf(ChestKind.StaticSettings, container.Settings.Id.Value) >= 0)

@@ -1,25 +1,25 @@
 using System;
 using HarmonyLib;
 using Il2CppMoon.Forsaken;
-using MapMarkers;
+using MoreMapFilters;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(MapMarkersMod), "Map Markers", "1.0.0", "vergir")]
+[assembly: MelonInfo(typeof(MoreMapFiltersMod), "More Map Filters", "1.0.0", "vergir")]
 [assembly: MelonGame("Moon Studios", "NoRestForTheWicked")]
 // MelonLoader would otherwise apply every [HarmonyPatch] itself, twice with our PatchAll and even when Enabled = false.
 [assembly: HarmonyDontPatchAll]
 
-namespace MapMarkers;
+namespace MoreMapFilters;
 
 /// <summary>Entry point. See docs/internal.md.</summary>
-public class MapMarkersMod : MelonMod
+public class MoreMapFiltersMod : MelonMod
 {
-    public static MapMarkersMod Instance { get; private set; } = null!;
+    public static MoreMapFiltersMod Instance { get; private set; } = null!;
     public static MelonLogger.Instance Log => Instance.LoggerInstance;
 
     /// <summary>Details for troubleshooting (indexing, area variants, cave rolls, live reads, timings): only with
-    /// [MapMarkers] Debug = true. Writing a log line costs ~1 ms, so the per-event lines stay off by default.</summary>
+    /// [MoreMapFilters] Debug = true. Writing a log line costs ~1 ms, so the per-event lines stay off by default.</summary>
     public static void Debug(string message)
     {
         if (Prefs.Debug.Value) Log.Msg(message);
@@ -36,7 +36,7 @@ public class MapMarkersMod : MelonMod
             LoggerInstance.Msg("Disabled via preferences.");
             return;
         }
-        HarmonyInstance.PatchAll(typeof(MapMarkersMod).Assembly);
+        HarmonyInstance.PatchAll(typeof(MoreMapFiltersMod).Assembly);
         Heroes.Patch(HarmonyInstance, LoggerInstance);
 
         // After a hot reload the settings screens already exist; the Initialize postfix will not run for them.
@@ -107,7 +107,7 @@ internal static class GameplaySettingsTabInitializePatch
     {
         if (!Prefs.Enabled.Value || !Prefs.AddSettingsRows.Value) return;
         try { SettingsRows.AddTo(__instance.m_controls); }
-        catch (Exception e) { MapMarkersMod.Log.Error("Adding settings rows failed: " + e); }
+        catch (Exception e) { MoreMapFiltersMod.Log.Error("Adding settings rows failed: " + e); }
     }
 }
 
@@ -119,12 +119,12 @@ internal static class HeroTeleportCompletePatch
     private static void Postfix(HeroView self)
     {
         try { if (self != null && self.IsLocalPlayer) MapOverlay.RequestLiveCheck(); }
-        catch (Exception e) { MapMarkersMod.Log.Warning("Teleport hook: " + e.Message); }
+        catch (Exception e) { MoreMapFiltersMod.Log.Warning("Teleport hook: " + e.Message); }
     }
 }
 
 [HarmonyPatch(typeof(MapScreen), nameof(MapScreen.Show))]
 internal static class MapScreenShowPatch
 {
-    private static void Postfix(MapScreen __instance) => MapMarkersMod.OnMapShown(__instance);
+    private static void Postfix(MapScreen __instance) => MoreMapFiltersMod.OnMapShown(__instance);
 }

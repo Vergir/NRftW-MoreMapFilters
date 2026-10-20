@@ -3,7 +3,7 @@
 No Rest for the Wicked does not have fixed enemy camps everywhere. Most of the world is split into small areas, and each area
 has several **variants**: the same courtyard can hold Risen in one variant, Nith or Harvesters in another. The game picks
 the variant itself, and it changes over time. This page explains the rules as far as we could work them out from the game
-data and code, and how Map Markers shows them.
+data and code, and how More Map Filters shows them.
 
 ## The markers
 

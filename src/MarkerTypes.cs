@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace MapMarkers;
+namespace MoreMapFilters;
 
 /// <summary>
 /// Segments of the Markers row, in row order. Each belongs to one or two settings categories (MarkerCategory); dots

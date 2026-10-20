@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
-namespace MapMarkers;
+namespace MoreMapFilters;
 
 /// <summary>
 /// A live picture under the description of our Options rows, so the change is visible before the map is opened:

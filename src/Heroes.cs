@@ -3,7 +3,7 @@ using HarmonyLib;
 using Il2CppMoon.Forsaken;
 using MelonLoader;
 
-namespace MapMarkers;
+namespace MoreMapFilters;
 
 /// <summary>
 /// The heroes in the scene (ours and other players'), kept by Harmony hooks on HeroView.OnEnable / OnDisable instead of

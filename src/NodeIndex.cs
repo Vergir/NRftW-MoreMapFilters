@@ -4,7 +4,7 @@ using Il2CppPhoton.Deterministic;
 using Il2CppQuantum;
 using UnityEngine;
 
-namespace MapMarkers;
+namespace MoreMapFilters;
 
 /// <summary>What a point's EntityId refers to (for the cleared state, see ClearedState).</summary>
 internal enum PointSource
@@ -177,7 +177,7 @@ internal static class NodeIndex
             setOf.TryGetValue(e.InstanceGuid, out long contentSet);
             Nodes.Add(MapPoint.At(type, e.Name, e.Position, PointSource.Resource, e.InstanceGuid, contentSet));
         }
-        MapMarkersMod.Debug($"Indexed {Nodes.Count} resource nodes ({setOf.Count} linked entities with a content set).");
+        MoreMapFiltersMod.Debug($"Indexed {Nodes.Count} resource nodes ({setOf.Count} linked entities with a content set).");
         return true;
     }
 

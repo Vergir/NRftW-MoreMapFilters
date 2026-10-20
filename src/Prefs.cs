@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using MelonLoader;
 
-namespace MapMarkers;
+namespace MoreMapFilters;
 
-/// <summary>User settings, stored in UserData/MelonPreferences.cfg under [MapMarkers].</summary>
+/// <summary>User settings, stored in UserData/MelonPreferences.cfg under [MoreMapFilters].</summary>
 internal static class Prefs
 {
     public static MelonPreferences_Entry<bool> Enabled = null!;
@@ -35,8 +35,8 @@ internal static class Prefs
 
     public static void Init()
     {
-        bool carryOver = OldSectionOnly();
-        var cat = MelonPreferences.CreateCategory("MapMarkers", "Map Markers");
+        string? carryFrom = OldSectionOnly();
+        var cat = MelonPreferences.CreateCategory("MoreMapFilters", "More Map Filters");
         Enabled = cat.CreateEntry("Enabled", true, description: "Master switch.");
         Selected = cat.CreateEntry("Selected", "",
             description: "Resource types shown on the map, comma separated: " + string.Join(", ", MarkerTypes.All.Select(t => t.Id)) +
@@ -65,7 +65,7 @@ internal static class Prefs
         Unlocked = cat.CreateEntry("Unlocked", "",
             description: "Per world: marker types that have had something to show, so their buttons stay in the Markers row. " +
                          "Format: worldId=id,id;worldId=id,... Written by the mod.");
-        if (carryOver) CarryOver(cat);
+        if (carryFrom != null) CarryOver(cat, carryFrom);
         _selected = new HashSet<string>(Selected.Value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
         // 0.1 prototype had one "fish" type; it became carp / trout / bass.
         if (_selected.Remove("fish")) { _selected.Add("carp"); _selected.Add("trout"); _selected.Add("bass"); }
@@ -107,27 +107,28 @@ internal static class Prefs
         return true;
     }
 
-    /// <summary>The test builds were called Map Resource Markers ([MapResourceMarkers]): true when the file has only that
-    /// section, so its values are carried over once.</summary>
-    private static bool OldSectionOnly()
+    /// <summary>The test builds were called Map Resource Markers, then Map Markers: the newest of their sections, when the
+    /// file has no [MoreMapFilters] yet, is carried over once. Null when there is nothing to carry.</summary>
+    private static string? OldSectionOnly()
     {
         try
         {
-            var path = System.IO.Path.Combine(MelonLoader.Utils.MelonEnvironment.UserDataDirectory, "MelonPreferences.cfg");
-            if (!System.IO.File.Exists(path)) return false;
-            var text = System.IO.File.ReadAllText(path);
-            return text.Contains("[" + OldSection + "]") && !text.Contains("[MapMarkers]");
+            if (!System.IO.File.Exists(CfgPath)) return null;
+            var text = System.IO.File.ReadAllText(CfgPath);
+            if (text.Contains("[MoreMapFilters]")) return null;
+            return OldSections.FirstOrDefault(o => text.Contains("[" + o + "]"));
         }
-        catch { return false; }
+        catch { return null; }
     }
 
-    private const string OldSection = "MapResourceMarkers";
+    private static readonly string[] OldSections = { "MapMarkers", "MapResourceMarkers" };
+    private static string CfgPath => System.IO.Path.Combine(MelonLoader.Utils.MelonEnvironment.UserDataDirectory, "MelonPreferences.cfg");
 
-    private static void CarryOver(MelonPreferences_Category cat)
+    private static void CarryOver(MelonPreferences_Category cat, string oldSection)
     {
         try
         {
-            var old = MelonPreferences.CreateCategory(OldSection, OldSection, true, false);
+            var old = MelonPreferences.CreateCategory(oldSection, oldSection, true, false);
             foreach (var e in cat.Entries)
                 switch (e)
                 {
@@ -136,12 +137,11 @@ internal static class Prefs
                     case MelonPreferences_Entry<string> t: t.Value = old.CreateEntry(t.Identifier, t.Value).Value; break;
                 }
             foreach (var id in old.Entries.Select(e => e.Identifier).ToList()) old.DeleteEntry(id);
-            MelonPreferences.RemoveCategoryFromFile(
-                System.IO.Path.Combine(MelonLoader.Utils.MelonEnvironment.UserDataDirectory, "MelonPreferences.cfg"), OldSection);
+            foreach (var o in OldSections) MelonPreferences.RemoveCategoryFromFile(CfgPath, o);
             MelonPreferences.Save();
-            MelonLogger.Msg($"Map Markers: carried the [{OldSection}] preferences over to [MapMarkers].");
+            MelonLogger.Msg($"More Map Filters: carried the [{oldSection}] preferences over to [MoreMapFilters].");
         }
-        catch (Exception e) { MelonLogger.Warning($"Map Markers: carrying [{OldSection}] over failed: {e.Message}"); }
+        catch (Exception e) { MelonLogger.Warning($"More Map Filters: carrying [{oldSection}] over failed: {e.Message}"); }
     }
 
     public static void SaveUnlocked() => MelonPreferences.Save();

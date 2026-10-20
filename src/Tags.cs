@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Il2CppQuantum;
 
-namespace MapMarkers;
+namespace MoreMapFilters;
 
 internal static class Tags
 {

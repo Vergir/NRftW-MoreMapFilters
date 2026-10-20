@@ -1,6 +1,6 @@
-# Map Markers
+# More Map Filters
 
-![Map Markers](docs/pics/nexus/header.jpg)
+![More Map Filters](docs/pics/nexus/header.jpg)
 
 A [MelonLoader](https://github.com/LavaGang/MelonLoader) mod for **No Rest for the Wicked** that adds a Markers panel to the
 map's Filters menu: pick trees, ores, fishing and digging spots, herbs and food, the animals whose parts upgrade gear,
@@ -8,7 +8,7 @@ the enemy factions of the "Kill N" challenges, treasure chests, keys, undiscover
 the map shows where they are, with the world's
 current state (area variants, harvested / killed / looted spots, caves). Display only; the Quantum simulation is untouched.
 
-Download: [GitHub releases](https://github.com/vergir/NRftW-MapMarkers/releases/latest)
+Download: [GitHub releases](https://github.com/vergir/NRftW-MoreMapFilters/releases/latest)
 
 What players see is described on the Nexus page ([docs/nexus-description.bbcode](docs/nexus-description.bbcode)); how enemy
 spawns work, for players, in [docs/enemy-spawns.md](docs/enemy-spawns.md); the traced game code, data sources and dead
@@ -16,9 +16,9 @@ ends in [docs/internal.md](docs/internal.md).
 
 ## Build
 
-* `dotnet build -c Release` builds and copies `MapMarkers.dll` to `<game>/Mods` (`-p:DeployToGame=false` to skip,
+* `dotnet build -c Release` builds and copies `MoreMapFilters.dll` to `<game>/Mods` (`-p:DeployToGame=false` to skip,
   `-p:GameDir=...` for another install). With HotReload in `<game>/Plugins` the running game picks up new builds.
-* `pwsh ./package.ps1` builds the release zip into `dist/MapMarkers.zip` (`Mods/MapMarkers.dll`, README,
+* `pwsh ./package.ps1` builds the release zip into `dist/MoreMapFilters.zip` (`Mods/MoreMapFilters.dll`, README,
   LICENSE, CHANGELOG).
 * Needs MelonLoader 0.7.3's generated interop assemblies in the game folder (start the game once with MelonLoader).
 * `src/Shared/SettingsRowsKit.cs` is a vendored copy of the workspace's `../Shared/SettingsRowsKit.cs` (a build warning
@@ -28,7 +28,7 @@ ends in [docs/internal.md](docs/internal.md).
 
 | Path | What |
 |---|---|
-| `src/MapMarkersMod.cs` | Entry point, per-frame ticks, map / teleport / settings hooks, unload. |
+| `src/MoreMapFiltersMod.cs` | Entry point, per-frame ticks, map / teleport / settings hooks, unload. |
 | `src/MarkerTypes.cs` | Groups, settings categories, the marker types and their game asset guids. |
 | `src/NodeIndex.cs`, `src/EnemyIndex.cs`, `src/AnimalIndex.cs`, `src/Entrances.cs` | Where things are: world data, area variants and their state, caves. |
 | `src/ClearedState.cs`, `src/LiveUpdates.cs` | Harvested / killed / looted, from the save and the live world. |
@@ -38,7 +38,7 @@ ends in [docs/internal.md](docs/internal.md).
 
 ## Preferences
 
-`UserData/MelonPreferences.cfg`, section `[MapMarkers]`:
+`UserData/MelonPreferences.cfg`, section `[MoreMapFilters]`:
 
 | Key | Default | |
 |---|---|---|

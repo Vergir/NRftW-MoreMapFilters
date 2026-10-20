@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Il2CppMoon.Forsaken;
 using Il2CppQuantum;
 
-namespace MapMarkers;
+namespace MoreMapFilters;
 
 /// <summary>
 /// Button names in the game's language. In English the mod's own labels are kept ("Pine", "Giants", "Digging Spots"); in
@@ -49,7 +49,7 @@ internal static class Localization
         }
         catch (Exception e)
         {
-            MapMarkersMod.Log.Warning($"Localized name of {type.Id}: {e.Message}");
+            MoreMapFiltersMod.Log.Warning($"Localized name of {type.Id}: {e.Message}");
         }
         if (string.IsNullOrWhiteSpace(text)) return type.Label;   // not resolvable (yet): retried next time
         Cache[type] = text!;
@@ -76,7 +76,7 @@ internal static class Localization
                     AnimalKind a => ItemName(a.IconItemGuid) ?? "?",
                     _ => "?",
                 };
-                MapMarkersMod.Debug($"Game language {(_english.Value ? "English: the mod's own button names" : "not English: the game's names")}" +
+                MoreMapFiltersMod.Debug($"Game language {(_english.Value ? "English: the mod's own button names" : "not English: the game's names")}" +
                                               $" (game texts e.g. {Sample(MarkerTypes.Enemies[0])}, {Sample(MarkerTypes.Resources[0])}, {Sample(MarkerTypes.Animals[0])}, {Sample(Array.Find(MarkerTypes.Resources, t => t.Id == "dig")!)})");
             }
             return _english.Value;

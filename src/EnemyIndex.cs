@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Il2CppMoon.Forsaken;
 using Il2CppQuantum;
 
-namespace MapMarkers;
+namespace MoreMapFilters;
 
 /// <summary>
 /// Enemy spawn points per EnemyKind, from the world's static data (analysis/repeatable_quests.md section 3; verified in game
@@ -324,9 +324,9 @@ internal static class EnemyIndex
                         catch (Exception e)
                         {
                             data = null;
-                            if (npcData.Count < 3) MapMarkersMod.Log.Warning($"FindAsset<NpcData>({guid}): {e.GetType().Name}: {e.Message}");
+                            if (npcData.Count < 3) MoreMapFiltersMod.Log.Warning($"FindAsset<NpcData>({guid}): {e.GetType().Name}: {e.Message}");
                         }
-                        if (data == null && npcData.Count < 3) MapMarkersMod.Log.Warning($"NpcData {guid} for '{npc.DebugName}' not found");
+                        if (data == null && npcData.Count < 3) MoreMapFiltersMod.Log.Warning($"NpcData {guid} for '{npc.DebugName}' not found");
                         npcData[guid] = data;
                     }
                     if (data == null) continue;
@@ -340,7 +340,7 @@ internal static class EnemyIndex
                     }
                 }
         }
-        MapMarkersMod.Debug($"Indexed enemy spawn points: {spawnerPoints} from spawners, {placementPoints} placements " +
+        MoreMapFiltersMod.Debug($"Indexed enemy spawn points: {spawnerPoints} from spawners, {placementPoints} placements " +
                                       $"({contents.Count} content packs, {Buckets.Count} areas) in {sw.ElapsedMilliseconds} ms");
         return true;
     }
@@ -380,14 +380,14 @@ internal static class EnemyIndex
             }
             catch (Exception e)
             {
-                if (!_eligibilityLogged) MapMarkersMod.Log.Warning($"Reading area variants failed: {e.GetType().Name}: {e.Message}");
+                if (!_eligibilityLogged) MoreMapFiltersMod.Log.Warning($"Reading area variants failed: {e.GetType().Name}: {e.Message}");
                 _eligibilityLogged = true;
             }
         }
         if (!_eligibilityLogged)
         {
             _eligibilityLogged = true;
-            MapMarkersMod.Debug($"Area variants: {BucketList.Count} areas ({locked} locked: revealed, loaded or held by a quest), {eligible.Count} " +
+            MoreMapFiltersMod.Debug($"Area variants: {BucketList.Count} areas ({locked} locked: revealed, loaded or held by a quest), {eligible.Count} " +
                                           $"of {payloads} variants eligible, read in {sw.Elapsed.TotalMilliseconds:F1} ms");
         }
         changed |= !eligible.SetEquals(EligibleNuggets);
@@ -397,7 +397,7 @@ internal static class EnemyIndex
         if (pinnedText != _pinnedLogged)
         {
             _pinnedLogged = pinnedText;
-            MapMarkersMod.Debug(pinned.Count == 0 ? "No area is held by a quest or bounty variant."
+            MoreMapFiltersMod.Debug(pinned.Count == 0 ? "No area is held by a quest or bounty variant."
                                                             : $"Held by a quest or bounty variant ({pinned.Count}): {pinnedText}");
         }
         EligibleNuggets.Clear();
@@ -412,7 +412,7 @@ internal static class EnemyIndex
         catch (Exception e)
         {
             f = 0;
-            if (cache.Count < 3) MapMarkersMod.Log.Warning($"NuggetData {nugget.Value}: {e.GetType().Name}: {e.Message}");
+            if (cache.Count < 3) MoreMapFiltersMod.Log.Warning($"NuggetData {nugget.Value}: {e.GetType().Name}: {e.Message}");
         }
         cache[nugget.Value] = f;
         return f;

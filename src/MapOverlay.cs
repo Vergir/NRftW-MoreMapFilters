@@ -6,7 +6,7 @@ using Il2CppQuantum;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace MapMarkers;
+namespace MoreMapFilters;
 
 /// <summary>
 /// The markers: one Image per point (resource node / enemy spawn point) under the map's own icon layer (mapScreen/.../chunks/icons, first sibling so
@@ -100,7 +100,7 @@ internal static class MapOverlay
         if (f != null) ClearedState.Refresh(f);
         HeightArrows.ReadFromGame(screen);
         Refresh();
-        if (sw.ElapsedMilliseconds > 50) MapMarkersMod.Debug($"Markers built / refreshed in {sw.ElapsedMilliseconds} ms");
+        if (sw.ElapsedMilliseconds > 50) MoreMapFiltersMod.Debug($"Markers built / refreshed in {sw.ElapsedMilliseconds} ms");
     }
 
     /// <summary>How many resource nodes the area variants hide or leave open (once per index build).</summary>
@@ -120,7 +120,7 @@ internal static class MapOverlay
             }
         var parts = new List<string>();
         foreach (var kv in hiddenTypes) parts.Add($"{kv.Key} {kv.Value}");
-        MapMarkersMod.Debug($"Resource nodes: {plain} there, {possible} possible (area variant may roll), {hidden} not there now" +
+        MoreMapFiltersMod.Debug($"Resource nodes: {plain} there, {possible} possible (area variant may roll), {hidden} not there now" +
                                       (hidden > 0 ? $" ({string.Join(", ", parts)})" : ""));
     }
 
@@ -152,7 +152,7 @@ internal static class MapOverlay
             if (f != null && UpdateLive(f))
             {
                 liveChanged = true;
-                MapMarkersMod.Debug("Area variants changed while the map is open; markers updated.");
+                MoreMapFiltersMod.Debug("Area variants changed while the map is open; markers updated.");
             }
         }
         if (CaveGuard(hero.transform.position)) liveChanged = true;
@@ -213,14 +213,14 @@ internal static class MapOverlay
             {
                 _lastRoll = "";
                 LogRoll(near);
-                MapMarkersMod.Debug($"Cave {Entrances.ChunkName(near)} cannot re-roll now: {reason}.");
+                MoreMapFiltersMod.Debug($"Cave {Entrances.ChunkName(near)} cannot re-roll now: {reason}.");
             }
         }
         _lockedNoted = near != 0 && cave == 0 ? near : 0;
         bool changed = false;
         if (cave != _cave)
         {
-            MapMarkersMod.Debug(cave != 0 ? $"At the mouth of {Entrances.ChunkName(cave)}: watching its variant every 2 s. " +
+            MoreMapFiltersMod.Debug(cave != 0 ? $"At the mouth of {Entrances.ChunkName(cave)}: watching its variant every 2 s. " +
                                                       $"Variants the story allows: {DescribeEligible(cave)}. State: {StateOf(cave)}" : "Cave watch off.");
             _cave = cave;
             EnemyIndex.Watch(cave);
@@ -266,12 +266,12 @@ internal static class MapOverlay
             if (Time.unscaledTime - _lastStateLog >= 60f)
             {
                 _lastStateLog = Time.unscaledTime;
-                MapMarkersMod.Debug($"Cave {Entrances.ChunkName(cave)} still {roll} after {Time.unscaledTime - _lastRollAt:0} s, you are {_caveDistance:0} m from its mouth. State: {StateOf(cave)}");
+                MoreMapFiltersMod.Debug($"Cave {Entrances.ChunkName(cave)} still {roll} after {Time.unscaledTime - _lastRollAt:0} s, you are {_caveDistance:0} m from its mouth. State: {StateOf(cave)}");
             }
             return;
         }
         string since = _lastRoll.Length > 0 ? $" ({Time.unscaledTime - _lastRollAt:0} s after the last roll)" : "";
-        MapMarkersMod.Debug($"Cave {Entrances.ChunkName(cave)} rolled: {roll}{since}, you are {_caveDistance:0} m from its mouth");
+        MoreMapFiltersMod.Debug($"Cave {Entrances.ChunkName(cave)} rolled: {roll}{since}, you are {_caveDistance:0} m from its mouth");
         _lastRoll = roll;
         _lastRollAt = Time.unscaledTime;
     }
@@ -676,7 +676,7 @@ internal static class MapOverlay
             n++;
         }
         if (n > 0 && type is not ResourceType || caves.Count > 0)
-            MapMarkersMod.Debug($"{type.Label}: {n} markers created ({inCaves} points in {caves.Count} caves at their entrances).");
+            MoreMapFiltersMod.Debug($"{type.Label}: {n} markers created ({inCaves} points in {caves.Count} caves at their entrances).");
     }
 
     private static List<MapPoint> KeyPoints()

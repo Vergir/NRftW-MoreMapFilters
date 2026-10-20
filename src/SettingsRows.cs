@@ -4,7 +4,7 @@ using MelonLoader;
 using NrftwShared;
 using UnityEngine;
 
-namespace MapMarkers;
+namespace MoreMapFilters;
 
 /// <summary>
 /// Our rows at the end of Options > Gameplay, after a divider (same pattern as Dailies Reset Timer and Display &amp; UI
@@ -24,7 +24,7 @@ internal static class SettingsRows
 
     private static readonly SettingsRowsKit Kit = new SettingsRowsKit(Prefix,
         new[] { SpacerId, HeadingId, UnexploredId, SizeId }.Concat(MarkerGroups.Categories.Select(CategoryId)).ToArray(),
-        () => MapMarkersMod.Log, SettingsRowsKit.GameplayTabControls);
+        () => MoreMapFiltersMod.Log, SettingsRowsKit.GameplayTabControls);
 
     /// <summary>Add the rows to every settings screen that already exists (after a hot reload).</summary>
     public static void AddToLiveScreens() => Kit.AddToLiveScreens(AddTo);
@@ -38,7 +38,7 @@ internal static class SettingsRows
         if (rows == null) return;
 
         rows.Spacer(SpacerId);
-        rows.Heading(HeadingId, "Map Markers");
+        rows.Heading(HeadingId, "More Map Filters");
         rows.Toggle(UnexploredId, UnexploredLabel,
             "Also show markers in parts of the map you have not explored yet, e.g. ore veins or enemy camps beyond the fog. " +
             "This might spoil the fun of exploring.",
@@ -57,7 +57,7 @@ internal static class SettingsRows
                 Prefs.CategoryEntry(c), _ => { FilterRow.UpdateVisibility(); MapOverlay.Refresh(); });
             SettingsPreview.Register(label, c);
         }
-        MapMarkersMod.Log.Msg($"Added Map Markers rows to Options > {tabName}");
+        MoreMapFiltersMod.Log.Msg($"Added More Map Filters rows to Options > {tabName}");
     }
 
     /// <summary>Hot reload / unload: destroy our rows on every live settings screen and free their registry keys.</summary>

@@ -122,8 +122,8 @@ def cover():
     d.line([(760, 0), (560, H)], fill=GOLD, width=5)
     img = top_shade(img, 330, 0.93)
     d = ImageDraw.Draw(img)
-    d.text((W // 2, 40), "Map Markers", font=font(140), fill=WHITE, anchor="mt")
-    d.text((W // 2, 205), "Resources, enemies, loot and shortcuts on your map", font=font(48, False), fill=GOLD, anchor="mt")
+    d.text((W // 2, 40), "More Map Filters", font=font(140), fill=WHITE, anchor="mt")
+    d.text((W // 2, 205), "Animals, enemies, resources, loot and shortcuts on your map", font=font(48, False), fill=GOLD, anchor="mt")
     for text, x in (("Vanilla", 230), ("With the mod", 1500)):
         tw = d.textlength(text, font=font(44))
         d.rounded_rectangle((x - tw / 2 - 24, 985, x + tw / 2 + 24, 1055), 16, fill=(10, 8, 6))
@@ -245,8 +245,8 @@ def header():
     shade = Image.fromarray(np.tile(g.astype(np.uint8), (372, 1)))
     img = Image.composite(Image.new("RGB", img.size, (0, 0, 0)), img, shade)
     d = ImageDraw.Draw(img)
-    d.text((48, 150), "Map Markers", font=font(76), fill=WHITE, anchor="lm")
-    d.text((51, 232), "Resources, enemies, loot and shortcuts on your map", font=font(28, False), fill=GOLD, anchor="lm")
+    d.text((48, 150), "More Map Filters", font=font(76), fill=WHITE, anchor="lm")
+    d.text((51, 232), "Animals, enemies, resources, loot and shortcuts on your map", font=font(28, False), fill=GOLD, anchor="lm")
     save(img, "header.jpg")
 
 

@@ -1,4 +1,4 @@
-namespace MapMarkers;
+namespace MoreMapFilters;
 
 /// <summary>What a shortcut is (analysis/shortcuts.md); ladders and trapdoors are reached from above.</summary>
 internal enum ShortcutKind { Ladder, Trapdoor, OneWayDoor, Drawbridge, LeverGate, Wall }

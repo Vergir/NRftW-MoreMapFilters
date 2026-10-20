@@ -1,4 +1,4 @@
-# Map Markers: internals
+# More Map Filters: internals
 
 Verified in game for 1.0.0 (2026-10-19). Build 29466 (Steam). RVAs from `reference/dump.cs` in the workspace root; the
 `analysis/*.md` files named below are in the workspace root too (research notes with tools in `tools/`).
@@ -7,7 +7,7 @@ Verified in game for 1.0.0 (2026-10-19). Build 29466 (Steam). RVAs from `referen
 
 | File | What |
 |---|---|
-| `MapMarkersMod.cs` | Entry point: prefs, Harmony (`HarmonyDontPatchAll` + own `PatchAll`), settings rows, per-frame `MapOverlay.Sync` / `LiveUpdates.Tick` / `MapOverlay.LateUpdate` / `FilterRow.Tick`, `MapScreen.Show` and teleport hooks, unload. `Debug()` logs only with `Debug = true`. |
+| `MoreMapFiltersMod.cs` | Entry point: prefs, Harmony (`HarmonyDontPatchAll` + own `PatchAll`), settings rows, per-frame `MapOverlay.Sync` / `LiveUpdates.Tick` / `MapOverlay.LateUpdate` / `FilterRow.Tick`, `MapScreen.Show` and teleport hooks, unload. `Debug()` logs only with `Debug = true`. |
 | `MarkerTypes.cs` | `MarkerGroup` (row segments), `MarkerCategory` (settings), `MarkerType` and its kinds (`ResourceType`, `EnemyKind`, `AnimalKind`, `ChestKind`, `SpecialShinyKind`), the catalogue with all guids. |
 | `NodeIndex.cs` | `MapPoint`, `PointSource`; resource nodes, ground pickups and static chests from the linked entities, with their content set. |
 | `EnemyIndex.cs` | Enemy spawn points, chest and special-shiny spawners; area buckets, variants, eligibility, locks, quest pins: `State()`. |
@@ -191,9 +191,9 @@ the nugget guid is raw @+0x20 of the payload). One is eligible when `Weight > 0 
   one checkbox per category. `SettingsPreview` draws a live picture under the hovered row's description (the
   controls' `m_settingNameText` / `m_specificationText`; the row is recognized by its name): the category's markers,
   markers at the chosen size, a strip of explored land and fog with markers on both sides; what the setting turns off
-  is greyscale (MarkerArt.Grey). The rows sit under a "Map Markers" heading, in the Mods tab when Mod Settings Tab adds
-  one (SettingsRowsKit.ModTabOr), like the other mods. The test builds were "Map Resource Markers": `Prefs.CarryOver` copies a
-  lone `[MapResourceMarkers]` section to `[MapMarkers]` once.
+  is greyscale (MarkerArt.Grey). The rows sit under a "More Map Filters" heading, in the Mods tab when Mod Settings Tab adds
+  one (SettingsRowsKit.ModTabOr), like the other mods. The test builds were "Map Resource Markers", then "Map Markers" (taken on
+  Nexus): `Prefs.CarryOver` copies the newest of `[MapMarkers]` / `[MapResourceMarkers]` to `[MoreMapFilters]` once.
 * `Localization`: in English the mod's labels; otherwise the game's texts (enemy type names, item names via
   `HeroItemDataAsset.ItemNameMsg`, animals = their skull item, digging spots = the dig prompt "Dig",
   `LinkedFarmableResourceDataAsset` 964127749868152500 `.LocalizedShortenedHasToolHint`).

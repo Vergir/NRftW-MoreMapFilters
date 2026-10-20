@@ -106,7 +106,7 @@ internal static class SettingsPreview
     {
         var go = new GameObject("MRM_SettingsPreview", Il2CppInterop.Runtime.Il2CppType.Of<RectTransform>());
         var rt = go.GetComponent<RectTransform>();
-        rt.SetParent(spec.transform, false);
+        rt.SetParent(spec.transform, false, false);   // the 2-argument one is stripped (see MapOverlay)
         rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
         rt.pivot = new Vector2(0f, 1f);
         rt.sizeDelta = Vector2.zero;
@@ -220,7 +220,7 @@ internal static class SettingsPreview
     {
         var go = new GameObject("MRM_PreviewIcon", Il2CppInterop.Runtime.Il2CppType.Of<RectTransform>());
         var rt = go.GetComponent<RectTransform>();
-        rt.SetParent(root, false);
+        rt.SetParent(root, false, false);
         rt.anchorMin = rt.anchorMax = new Vector2(0f, 1f);
         rt.pivot = new Vector2(0.5f, 0.5f);
         rt.anchoredPosition = center;

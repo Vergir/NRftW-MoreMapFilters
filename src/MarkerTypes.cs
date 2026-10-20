@@ -303,7 +303,7 @@ internal sealed class ShortcutType : MarkerType
 {
     public static readonly Color32 Tint = new(70, 215, 185, 255);
 
-    public ShortcutType() : base("shortcuts", "Shortcuts", MarkerGroup.Navigation) { }
+    public ShortcutType() : base("shortcuts", "Undiscovered Shortcuts", MarkerGroup.Navigation) { }
 
     public override Sprite? ButtonSprite() => MarkerArt.ForGlyph(Id, "TrapdoorMapIcon", Tint, outlined: false, Badge.None, false);
     public override Sprite? MarkerSprite(Badge badge, bool cave) => MarkerArt.ForGlyph(Id, "TrapdoorMapIcon", Tint, outlined: true, badge, cave);

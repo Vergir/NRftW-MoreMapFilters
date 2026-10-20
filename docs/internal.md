@@ -161,6 +161,7 @@ the nugget guid is raw @+0x20 of the payload). One is eligible when `Weight > 0 
   height difference, full opacity at 30 m; up rotated z 90, down z 270). Child named `...NoMinimap`.
 * Minimap mod: it mirrors every active Image under the icon layer every 0.5 s (sprite swaps included); its own drawing
   size for other mods' markers is its business (`mods/Minimap/docs/foreign-marker-size.md`).
+  Marker names end in `@y=<world height>` (invariant culture): the Minimap reads it for its above / below arrows.
 
 ## The Markers panel (`FilterRow`)
 

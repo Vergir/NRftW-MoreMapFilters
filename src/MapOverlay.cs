@@ -695,7 +695,8 @@ internal static class MapOverlay
 
     private static GameObject NewMarker(string name, Vector3 position, bool onTop = false)
     {
-        var go = new GameObject(Prefix + name);
+        // "@y=<world height>": the Minimap mod reads it to draw its above / below arrow (map space only has x / z).
+        var go = new GameObject(Prefix + name + "@y=" + position.y.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture));
         var rt = go.AddComponent<RectTransform>();
         rt.SetParent(onTop && _topRoot != null ? _topRoot : _root, false, false);
         rt.localPosition = new Vector3(position.x, position.z, 0f);

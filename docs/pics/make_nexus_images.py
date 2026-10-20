@@ -1,6 +1,7 @@
 """Builds the Nexus / README images in docs/pics/nexus:
 
 * cover.jpg (1920x1080): main image, the map without and with the mod, split on a slant, the title on top
+* animals.jpg: the smith asking for a Bear Skull and the bears on the map
 * panel.jpg: the Markers panel in the map's Filters menu
 * challenge.jpg: a "Kill N" challenge and the map with that faction's markers
 * caves.jpg, valuables.jpg, navigation.jpg: the map with those markers, captioned
@@ -135,6 +136,35 @@ def panel():
     save(caption(img, "Pick what you are looking for", "A Markers panel in the map's Filters menu: one button per type"), "panel.jpg")
 
 
+def animals():
+    """The smith asking for a Bear Skull (left), the bears on the map (right)."""
+    smith = full("12_upgrade_moonshaft")
+    bears = full("13_animals_map")
+    img = dim(bears.filter(ImageFilter.GaussianBlur(16)), 0.3)
+    img = caption(img, "Need a Bear Skull? Here are the bears",
+                  "Wolves, stags, sirens, boars, winged broods and bears: the parts your upgrades ask for")
+    card_box = (590, 112, 1055, 1020)                 # the item card, down to the Upgrade button
+    k = 780 / (card_box[3] - card_box[1])
+    card = smith.crop(card_box)
+    card = card.resize((int(card.width * k), int(card.height * k)), Image.LANCZOS)
+    cx, cy = 90, 255
+    img = shadow(img, (cx - 10, cy - 10, cx + card.width + 10, cy + card.height + 10), 30, 220, False)
+    img.paste(card, (cx, cy), rounded(card, 14))
+    # the Bear Skull row (y ~ 841 in the frame)
+    d = ImageDraw.Draw(img)
+    ry = cy + int((841 - card_box[1]) * k)
+    d.rounded_rectangle((cx + 4, ry - 21, cx + card.width - 4, ry + 21), 10, outline=GOLD, width=4)
+    map_box = (470, 170, 1530, 766)                   # the bears around the hero, Marin Woods
+    tile = bears.crop(map_box).resize((1290, 725), Image.LANCZOS)
+    mx, my = 570, 285
+    img = shadow(img, (mx - 10, my - 10, mx + tile.width + 10, my + tile.height + 10), 30, 220, False)
+    img.paste(tile, (mx, my), rounded(tile, 14))
+    d = ImageDraw.Draw(img)
+    for x, y in ((765, 537), (822, 582), (845, 680), (1690, 715)):   # the bear markers on the tile
+        d.ellipse((x - 36, y - 36, x + 36, y + 36), outline=GOLD, width=3)
+    save(img, "animals.jpg")
+
+
 def challenge():
     """The challenge on the left, the faction's markers on the right."""
     risen = window(full("03b_risen_map"), (0, 40, 1500, 884))
@@ -223,6 +253,7 @@ def header():
 def main():
     os.makedirs(OUT, exist_ok=True)
     cover()
+    animals()
     panel()
     challenge()
     map_shot("04_caves", "caves.jpg", "Caves show at their entrance",

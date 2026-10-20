@@ -15,7 +15,8 @@ First public release.
   after the action, also on the Minimap mod's minimap.
 * What is inside caves and cellars shows at their entrance; waiting at a cave's entrance shows the moment it rolls the
   enemy you are after.
-* The game's height arrows on markers near you; marker size and markers in unexplored areas in Options > Gameplay.
+* The game's height arrows on markers near you (on the Minimap mod's minimap too); marker size and markers in unexplored
+  areas in Options > Gameplay, every row with a live preview under its description.
 * Buttons appear once the story allows the type in your world and turn grey while none is around; names in the game's
   language.
 * Gamepad (D-pad and left stick) and keyboard navigation like the game's own filters.

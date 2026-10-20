@@ -15,15 +15,15 @@ internal static class SettingsRows
 {
     private const string Prefix = "MRM_";
     private const PlayerSettingCategory Category = PlayerSettingCategory.Gameplay;
-    private const string SpacerId = "MRM_Spacer", UnexploredId = "MRM_Unexplored", SizeId = "MRM_MarkerSize";
+    private const string SpacerId = "MRM_Spacer", HeadingId = "MRM_Heading", UnexploredId = "MRM_Unexplored", SizeId = "MRM_MarkerSize";
 
     private static string CategoryId(MarkerCategory c) => "MRM_Show" + c;
 
     /// <summary>Row names; SettingsPreview recognizes the hovered row by them.</summary>
-    private const string UnexploredLabel = "Map Markers in Unexplored Areas", SizeLabel = "Map Marker Size";
+    private const string UnexploredLabel = "Markers in Unexplored Areas", SizeLabel = "Marker Size";
 
     private static readonly SettingsRowsKit Kit = new SettingsRowsKit(Prefix,
-        new[] { SpacerId, UnexploredId, SizeId }.Concat(MarkerGroups.Categories.Select(CategoryId)).ToArray(),
+        new[] { SpacerId, HeadingId, UnexploredId, SizeId }.Concat(MarkerGroups.Categories.Select(CategoryId)).ToArray(),
         () => MapMarkersMod.Log, SettingsRowsKit.GameplayTabControls);
 
     /// <summary>Add the rows to every settings screen that already exists (after a hot reload).</summary>
@@ -32,10 +32,13 @@ internal static class SettingsRows
     public static void AddTo(SettingsScreenControls? controls)
     {
         if (controls != null) SettingsPreview.Track(controls.m_settingNameText, controls.m_specificationText);
-        var rows = Kit.Begin(controls, Category, UnexploredId);
+        // The Mods tab when Mod Settings Tab adds one, else Gameplay; under our own heading like the other mods.
+        var category = SettingsRowsKit.ModTabOr(controls, Category, out string tabName);
+        var rows = Kit.Begin(controls, category, UnexploredId, tabName);
         if (rows == null) return;
 
         rows.Spacer(SpacerId);
+        rows.Heading(HeadingId, "Map Markers");
         rows.Toggle(UnexploredId, UnexploredLabel,
             "Also show markers in parts of the map you have not explored yet, e.g. ore veins or enemy camps beyond the fog. " +
             "This might spoil the fun of exploring.",
@@ -49,12 +52,12 @@ internal static class SettingsRows
         SettingsPreview.RegisterSize(SizeLabel);
         foreach (var c in MarkerGroups.Categories)
         {
-            string label = "Map Markers: " + MarkerGroups.Label(c);
+            string label = MarkerGroups.Label(c);
             rows.Toggle(CategoryId(c), label, MarkerGroups.Description(c),
                 Prefs.CategoryEntry(c), _ => { FilterRow.UpdateVisibility(); MapOverlay.Refresh(); });
             SettingsPreview.Register(label, c);
         }
-        MapMarkersMod.Log.Msg("Added Map Markers rows to Options > Gameplay");
+        MapMarkersMod.Log.Msg($"Added Map Markers rows to Options > {tabName}");
     }
 
     /// <summary>Hot reload / unload: destroy our rows on every live settings screen and free their registry keys.</summary>

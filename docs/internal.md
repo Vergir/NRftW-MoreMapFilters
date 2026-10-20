@@ -189,9 +189,10 @@ the nugget guid is raw @+0x20 of the payload). One is eligible when `Weight > 0 
 
 * Options > Gameplay rows via the shared kit (`src/Shared/SettingsRowsKit.cs`, vendored): unexplored areas, marker size,
   one checkbox per category. `SettingsPreview` draws a live picture under the hovered row's description (the
-  controls' `m_settingNameText` / `m_specificationText`; the row is recognized by its name): the category's markers
-  while it is on, markers at the chosen size, a strip of explored land and fog with markers on both sides (the fogged
-  ones only while "unexplored areas" is on). The test builds were "Map Resource Markers": `Prefs.CarryOver` copies a
+  controls' `m_settingNameText` / `m_specificationText`; the row is recognized by its name): the category's markers,
+  markers at the chosen size, a strip of explored land and fog with markers on both sides; what the setting turns off
+  is greyscale (MarkerArt.Grey). The rows sit under a "Map Markers" heading, in the Mods tab when Mod Settings Tab adds
+  one (SettingsRowsKit.ModTabOr), like the other mods. The test builds were "Map Resource Markers": `Prefs.CarryOver` copies a
   lone `[MapResourceMarkers]` section to `[MapMarkers]` once.
 * `Localization`: in English the mod's labels; otherwise the game's texts (enemy type names, item names via
   `HeroItemDataAsset.ItemNameMsg`, animals = their skull item, digging spots = the dig prompt "Dig",

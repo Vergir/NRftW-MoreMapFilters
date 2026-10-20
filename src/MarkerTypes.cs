@@ -74,10 +74,8 @@ internal static class MarkerGroups
              "this might feel like cheating or spoil the fun of exploring.",
     };
 
-    /// <summary>Off until the player opts in: Valuables (shows where loot is), Navigation (spoils discovery) and Cooking (a
-    /// long row of ingredients).</summary>
-    public static bool DefaultOn(MarkerCategory c) =>
-        c is not (MarkerCategory.Valuables or MarkerCategory.Navigation or MarkerCategory.Cooking);
+    /// <summary>Off until the player opts in: Valuables (shows where loot is) and Cooking (a long row of ingredients).</summary>
+    public static bool DefaultOn(MarkerCategory c) => c is not (MarkerCategory.Valuables or MarkerCategory.Cooking);
 }
 
 /// <summary>Corner badge on a marker: "?" = the point only might have it (animal spawners), cross = cleared (harvested /

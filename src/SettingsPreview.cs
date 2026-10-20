@@ -8,8 +8,8 @@ namespace MapMarkers;
 
 /// <summary>
 /// A live picture under the description of our Options rows, so the change is visible before the map is opened:
-/// a group's markers (shown while the group is on), markers at the chosen size, and a strip of explored land and fog
-/// with markers on both sides (the fogged ones only while "unexplored areas" is on). The settings screen shows the
+/// a group's markers, markers at the chosen size, and a strip of explored land and fog with markers on both sides.
+/// What a setting turns off is drawn in greyscale (the group's markers, the fogged markers). The settings screen shows the
 /// hovered / selected row's name and description in two texts (SettingsScreenControls.m_settingNameText /
 /// m_specificationText); the row is recognized by its name, the picture hangs under the description text.
 /// </summary>
@@ -85,8 +85,8 @@ internal static class SettingsPreview
         for (int i = root.childCount - 1; i >= 0; i--) Object.Destroy(root.GetChild(i).gameObject);
         bool complete = kind switch
         {
-            Kind.Category => on == 0 || Icons(root, Types(c), IconPx, s.Spec.rectTransform.rect.width),
-            Kind.Size => Icons(root, SizeSamples(), IconPx * scale, s.Spec.rectTransform.rect.width),
+            Kind.Category => Icons(root, Types(c), IconPx, s.Spec.rectTransform.rect.width, grey: on == 0),
+            Kind.Size => Icons(root, SizeSamples(), IconPx * scale, s.Spec.rectTransform.rect.width, grey: false),
             Kind.Unexplored => Strip(root, s.Spec.rectTransform.rect.width, on == 1, scale),
             _ => true,
         };
@@ -144,7 +144,7 @@ internal static class SettingsPreview
     }
 
     /// <summary>Map markers in rows across the description's width; false when a sprite is missing.</summary>
-    private static bool Icons(RectTransform root, List<MarkerType> types, float iconPx, float width)
+    private static bool Icons(RectTransform root, List<MarkerType> types, float iconPx, float width, bool grey)
     {
         // The baked sprite has room for outline and shadow around the picture (MarkerArt.IconFraction).
         float size = iconPx / MarkerArt.IconFraction, step = iconPx + Spacing;
@@ -152,12 +152,19 @@ internal static class SettingsPreview
         bool complete = true;
         for (int i = 0; i < types.Count; i++)
         {
-            var sprite = types[i].MarkerSprite(Badge.None, false);
+            var sprite = PreviewSprite(types[i], grey);
             if (sprite == null) { complete = false; continue; }
             float x = (i % perRow) * step + iconPx * 0.5f, y = -(i / perRow) * (iconPx + Spacing) - iconPx * 0.5f;
             Image(root, sprite, new Vector2(x, y), size);
         }
         return complete;
+    }
+
+    /// <summary>The map marker; greyscale for what the setting turns off.</summary>
+    private static Sprite? PreviewSprite(MarkerType type, bool grey)
+    {
+        var sprite = type.MarkerSprite(Badge.None, false);
+        return grey ? MarkerArt.Grey("preview_" + type.Id, sprite) : sprite;
     }
 
     private static Texture2D? _fog;
@@ -177,8 +184,7 @@ internal static class SettingsPreview
         bool complete = true;
         for (int i = 0; i < spots.Length && i < samples.Count; i++)
         {
-            if (spots[i].Fogged && !showFogged) continue;
-            var sprite = samples[i].MarkerSprite(Badge.None, false);
+            var sprite = PreviewSprite(samples[i], spots[i].Fogged && !showFogged);
             if (sprite == null) { complete = false; continue; }
             Image(root, sprite, new Vector2(width * spots[i].X, -StripHeight * spots[i].Y), size);
         }

@@ -44,8 +44,8 @@ ends in [docs/internal.md](docs/internal.md).
 | `Selected` | `""` | Selected types (comma-separated ids); set from the panel. |
 | `ShowInUnrevealed` | `true` | Markers in unexplored parts of the map. |
 | `MarkerScale` | `1` | Marker size (0.5..2). |
-| `ShowHarvesting`, `ShowAnimals`, `ShowEnemies` | `true` | Button groups in the panel. |
-| `ShowCooking`, `ShowValuables`, `ShowNavigation` | `false` | Button groups in the panel. |
+| `ShowHarvesting`, `ShowAnimals`, `ShowEnemies`, `ShowNavigation` | `true` | Button groups in the panel. |
+| `ShowCooking`, `ShowValuables` | `false` | Button groups in the panel. |
 | `ShowPossible` | `true` | "?" markers (the panel's "?" button). |
 | `Unlocked` | `""` | Per world: types that joined the panel (written by the mod). |
 | `KeysUsed`, `ShortcutsOpened` | `""` | Per world: keys whose door is open / opened shortcuts, hidden for good (written by the mod). |

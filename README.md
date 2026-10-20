@@ -1,5 +1,7 @@
 # Map Markers
 
+![Map Markers](docs/pics/nexus/header.jpg)
+
 A [MelonLoader](https://github.com/LavaGang/MelonLoader) mod for **No Rest for the Wicked** that adds a Markers panel to the
 map's Filters menu: pick trees, ores, fishing and digging spots, herbs and food, the animals whose parts upgrade gear,
 the enemy factions of the "Kill N" challenges, treasure chests, keys, undiscovered whispers or unopened shortcuts, and
